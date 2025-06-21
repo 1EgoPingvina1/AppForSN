@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 
-namespace DTC.Domain.Entities
+namespace DTC.Domain.Entities.Identity
 {
     public class User : IdentityUser<int>
     {
@@ -13,9 +13,9 @@ namespace DTC.Domain.Entities
         public string? Description { get; set; }
         public DateTime Birthday { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-        public DateTime? BlockDate {  get; set; }
+        public DateTime? BlockDate { get; set; }
         public DateTime? BanDate { get; set; }
         public ICollection<RefreshToken> RefreshTokens { get; set; } = new List<RefreshToken>();
-        public ICollection <UserRoles> Roles {  get; set; } = new List<UserRoles>();
+        public ICollection<UserRoles> Roles { get; set; } = new List<UserRoles>();
     }
 }

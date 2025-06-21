@@ -8,7 +8,6 @@ using System.Windows;
 
 namespace AppForSN
 {
-    // Ieditedit
     /// <summary>
     /// Логика взаимодействия для App.xaml
     /// </summary>

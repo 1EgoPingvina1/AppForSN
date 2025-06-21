@@ -1,11 +1,10 @@
 ﻿using DTC.API.DTO;
 using DTC.API.ErrorHandlers;
-using DTC.Domain.Entities;
+using DTC.Domain.Entities.Identity;
 using DTC.Domain.Interfaces;
 using DTC.Infrastructure.Data;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.Configuration;
 using System.Security.Cryptography;
 
 namespace DTC.Infrastructure.Services
@@ -16,20 +15,17 @@ namespace DTC.Infrastructure.Services
         private readonly UserManager<User> _userManager;
         private readonly ITokenService _tokenService;
         private readonly SignInManager<User> _signInManager;
-        private readonly IConfiguration _config;
 
         public AuthService(
             ApplicationDataBaseContext context,
             UserManager<User> userManager,
             SignInManager<User> signInManager,
-            ITokenService tokenService,
-            IConfiguration config)
+            ITokenService tokenService)
         {
             _context = context;
             _userManager = userManager;
             _signInManager = signInManager;
             _tokenService = tokenService;
-            _config = config;
         }
 
         public async Task<UserDTO> RegisterAsync(RegisterDTO registerDTO)
@@ -43,26 +39,26 @@ namespace DTC.Infrastructure.Services
                 IsAuthor = registerDTO.IsAuthor,
                 Birthday = registerDTO.Birthday,
                 UserName = registerDTO.Username,
-                EmailConfirmed = false
+                EmailConfirmed = false,
+                SecurityStamp = Guid.NewGuid().ToString()
             };
 
             var result = await _userManager.CreateAsync(user, registerDTO.Password);
 
-            await _userManager.AddToRoleAsync(user, "Member");
+            await _userManager.AddToRoleAsync(user, "Guess");
             if (!result.Succeeded)
                 throw new HttpExeption(422, "Looks like the attempted has failed. Please check your data and try again.");
 
             return new UserDTO
             {
                 Username = user.UserName,
-                Email = user.Email,
                 Token = _tokenService.GenerateJwtToken(user)
             };
         }
 
         public async Task<UserDTO> LoginAsync(LoginDTO login)
         {
-            var user = await _userManager.FindByEmailAsync(login.Email);
+            var user = await _userManager.FindByNameAsync(login.Username);
             if (user is null)
                 throw new HttpExeption(StatusCodes.Status401Unauthorized, "Invalid username or password");
             await _signInManager.CheckPasswordSignInAsync(user, login.Password, false);
@@ -70,7 +66,6 @@ namespace DTC.Infrastructure.Services
             return new UserDTO
             {
                 Username = user.UserName,
-                Email = user.Email,
                 Token = _tokenService.GenerateJwtToken(user)
             };
         }

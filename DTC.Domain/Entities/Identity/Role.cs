@@ -1,7 +1,6 @@
-﻿
-using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Identity;
 
-namespace DTC.Domain.Entities
+namespace DTC.Domain.Entities.Identity
 {
     public class Role : IdentityRole<int>
     {

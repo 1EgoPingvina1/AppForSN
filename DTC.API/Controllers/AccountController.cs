@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace DTC.API.Controllers
 {
     [ApiController]
+    [Route("api/[controller]")]
     public class AccountController : Controller
     {
         private readonly IAuthService _authService;

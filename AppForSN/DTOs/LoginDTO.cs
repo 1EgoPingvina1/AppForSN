@@ -1,4 +1,4 @@
-﻿namespace DTC.API.DTO
+﻿namespace AppForSNForUsers.DTOs
 {
     public class LoginDTO
     {

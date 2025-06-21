@@ -1,6 +1,6 @@
 ﻿using DTC.API.DTO;
 using DTC.API.ErrorHandlers;
-using DTC.Domain.Entities;
+using DTC.Domain.Entities.Identity;
 using DTC.Domain.Interfaces;
 using DTC.Infrastructure.Data;
 using DTC.Infrastructure.Services;
@@ -57,7 +57,6 @@ namespace DTC.Tests.Services
             var registerDto = new RegisterDTO
             {
                 Username = "testuser",
-                Email = "test@mail.com",
                 Password = "Test123$"
             };
 
@@ -90,7 +89,6 @@ namespace DTC.Tests.Services
             var registerDto = new RegisterDTO
             {
                 Username = "fail",
-                Email = "fail@mail.com",
                 Password = "failpass"
             };
 

@@ -1,4 +1,4 @@
-﻿using DTC.Domain.Entities;
+﻿using DTC.Domain.Entities.Identity;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;

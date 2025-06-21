@@ -1,4 +1,4 @@
-﻿using DTC.Domain.Entities;
+﻿using DTC.Domain.Entities.Identity;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;

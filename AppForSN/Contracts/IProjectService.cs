@@ -4,9 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace AppForSN.Data.Repositories
+namespace AppForSNForUsers.Contracts
 {
-    internal interface IUserRepository
+    public interface IProjectService
     {
+
     }
 }

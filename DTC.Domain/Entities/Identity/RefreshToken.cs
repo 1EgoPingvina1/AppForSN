@@ -1,6 +1,6 @@
 ﻿using System.Security.Cryptography;
 
-namespace DTC.Domain.Entities
+namespace DTC.Domain.Entities.Identity
 {
     public class RefreshToken
     {

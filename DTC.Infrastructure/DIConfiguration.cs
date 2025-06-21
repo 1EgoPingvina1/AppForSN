@@ -1,4 +1,4 @@
-﻿using DTC.Domain.Entities;
+﻿using DTC.Domain.Entities.Identity;
 using DTC.Domain.Interfaces;
 using DTC.Infrastructure.Data;
 using DTC.Infrastructure.Services;

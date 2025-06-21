@@ -1,4 +1,4 @@
-﻿using DTC.Domain.Entities;
+﻿using DTC.Domain.Entities.Identity;
 
 namespace DTC.Domain.Interfaces
 {
