@@ -5,6 +5,6 @@ namespace DTC.Application.Interfaces
 {
     public interface ITokenService
     {
-       string GenerateJwtToken(User user);
+       Task<string> GenerateJwtToken(User user);
     }
 }

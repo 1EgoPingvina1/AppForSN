@@ -8,11 +8,18 @@
 
     <UserControl.Resources>
 
-        <Color x:Key="SecondaryColor">#FF3498DB</Color>
-        <SolidColorBrush x:Key="SecondaryBrush" Color="{StaticResource SecondaryColor}"/>
+        <!-- Gaming Style Colors -->
+        <Color x:Key="HeaderBackgroundColor">#FF1F1F2E</Color>
+        <Color x:Key="AccentColor">#FF00FF9C</Color>
+        <Color x:Key="AccentColor2">#FF0077FF</Color>
+        <SolidColorBrush x:Key="HeaderBackgroundBrush" Color="{StaticResource HeaderBackgroundColor}"/>
+        <SolidColorBrush x:Key="AccentBrush" Color="{StaticResource AccentColor}"/>
+        <SolidColorBrush x:Key="AccentBrush2" Color="{StaticResource AccentColor2}"/>
+
+        <!-- Text Styles -->
         <Style x:Key="HeaderTextStyle" TargetType="TextBlock">
-            <Setter Property="FontSize" Value="20"/>
-            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="FontSize" Value="22"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
             <Setter Property="Foreground" Value="White"/>
             <Setter Property="VerticalAlignment" Value="Center"/>
         </Style>
@@ -23,10 +30,9 @@
             <Setter Property="VerticalAlignment" Value="Center"/>
             <Setter Property="Margin" Value="0,0,10,0"/>
         </Style>
-        
     </UserControl.Resources>
 
-    <Border Background="{StaticResource SecondaryBrush}" Padding="10">
+    <Border Background="{StaticResource HeaderBackgroundBrush}" Padding="12">
         <Grid>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto"/>
@@ -34,17 +40,27 @@
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
 
-            <TextBlock Text="DTC Social Network" 
-                       Style="{StaticResource HeaderTextStyle}"
-                       Grid.Column="1" 
-                       Margin="20,0,0,0"/>
+            <!-- Left logo or icon -->
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                <Ellipse Width="32" Height="32" Fill="{StaticResource AccentBrush2}"/>
+                <TextBlock Text="DTC" FontSize="20" FontWeight="Bold" Foreground="{StaticResource AccentBrush}" Margin="8,0,0,0"/>
+            </StackPanel>
 
-            <StackPanel Orientation="Horizontal" 
-                        Grid.Column="2" 
+            <!-- Center title -->
+            <TextBlock Text="DTC Social Network"
+                       Style="{StaticResource HeaderTextStyle}"
+                       Grid.Column="1"
+                       HorizontalAlignment="Center"
+                       VerticalAlignment="Center"/>
+
+            <!-- Right user info -->
+            <StackPanel Orientation="Horizontal"
+                        Grid.Column="2"
                         HorizontalAlignment="Right"
                         VerticalAlignment="Center">
 
-                <TextBlock Text="{Binding CurrentUser.DisplayName}" 
+                <TextBlock Text="👤" FontSize="16" VerticalAlignment="Center" Margin="0,0,5,0"/>
+                <TextBlock Text="{Binding CurrentUser.DisplayName}"
                            Style="{StaticResource UserInfoTextStyle}"/>
             </StackPanel>
         </Grid>

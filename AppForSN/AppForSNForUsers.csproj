@@ -110,14 +110,17 @@
     <Compile Include="Contracts\NavigateCommand.cs" />
     <Compile Include="Contracts\RelayCommand.cs" />
     <Compile Include="DTOs\LoginDTO.cs" />
+    <Compile Include="DTOs\ProjectViewDTO.cs" />
     <Compile Include="DTOs\RegisterDTO.cs" />
     <Compile Include="DTOs\UserDTO.cs" />
     <Compile Include="Services\ApiClient.cs" />
     <Compile Include="Services\AuthService.cs" />
+    <Compile Include="Services\ProjectApiService.cs" />
     <Compile Include="Settings.cs" />
     <Compile Include="ViewModels\LoginViewModel.cs" />
     <Compile Include="ViewModels\MainViewModel.cs" />
     <Compile Include="ViewModels\SideBarViewModel.cs" />
+    <Compile Include="ViewModels\UserProjectsViewModel.cs" />
     <Compile Include="Views\Authorization\RegisterView.xaml.cs">
       <DependentUpon>RegisterView.xaml</DependentUpon>
     </Compile>
@@ -129,6 +132,9 @@
     </Compile>
     <Compile Include="Views\Pages\UserWindowPage.xaml.cs">
       <DependentUpon>UserWindowPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Shared\DTC_SideBar.xaml.cs">
+      <DependentUpon>DTC_SideBar.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\Shared\HeaderView.xaml.cs">
       <DependentUpon>HeaderView.xaml</DependentUpon>
@@ -181,6 +187,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\Pages\UserWindowPage.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Shared\DTC_SideBar.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

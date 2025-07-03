@@ -1,17 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
+﻿using AppForSNForUsers.ViewModels;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace AppForSNForUsers.Views.Pages
 {
@@ -20,9 +8,18 @@ namespace AppForSNForUsers.Views.Pages
     /// </summary>
     public partial class UserWindowPage : Page
     {
+        private readonly UserProjectsViewModel _viewModel = new UserProjectsViewModel();
+
         public UserWindowPage()
         {
             InitializeComponent();
+            DataContext = _viewModel;
+
+            Loaded += async (s, e) =>
+            {
+                string token = App.CurrentUserToken;
+                await _viewModel.LoadAsync(token);
+            };
         }
     }
 }

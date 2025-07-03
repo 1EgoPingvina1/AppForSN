@@ -1,0 +1,44 @@
+﻿<UserControl x:Class="AppForSNForUsers.Views.Shared.DTC_SideBar"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:AppForSNForUsers.Views.Shared"
+             mc:Ignorable="d" >
+    <Border Background="#292940" Padding="10">
+        <StackPanel>
+            <TextBlock Text="Меню"
+                       Foreground="White"
+                       FontWeight="Bold"
+                       FontSize="16"
+                       Margin="0 0 0 10"/>
+
+            <Button Content="📁 Мои проекты"
+                    Margin="0 5"
+                    HorizontalContentAlignment="Left"
+                    Foreground="White"
+                    Background="#383854"
+                    BorderBrush="Transparent"
+                    Padding="10,5"
+                    FontSize="14"/>
+
+            <Button Content="➕ Создать проект"
+                    Margin="0 5"
+                    HorizontalContentAlignment="Left"
+                    Foreground="White"
+                    Background="#383854"
+                    BorderBrush="Transparent"
+                    Padding="10,5"
+                    FontSize="14"/>
+
+            <Button Content="⚙️ Настройки"
+                    Margin="0 5"
+                    HorizontalContentAlignment="Left"
+                    Foreground="White"
+                    Background="#383854"
+                    BorderBrush="Transparent"
+                    Padding="10,5"
+                    FontSize="14"/>
+        </StackPanel>
+    </Border>
+</UserControl>

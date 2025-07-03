@@ -44,14 +44,14 @@ namespace DTC.Domain.Services
 
             var result = await _userManager.CreateAsync(user, registerDTO.Password);
 
-            await _userManager.AddToRoleAsync(user, "Guess");
+            await _userManager.AddToRoleAsync(user, "User");
             if (!result.Succeeded)
                 throw new HttpExeption(422, "Looks like the attempted has failed. Please check your data and try again.");
 
             return new UserDTO
             {
                 Username = user.UserName,
-                Token = _tokenService.GenerateJwtToken(user)
+                Token = await _tokenService.GenerateJwtToken(user)
             };
         }
 
@@ -65,7 +65,7 @@ namespace DTC.Domain.Services
             return new UserDTO
             {
                 Username = user.UserName,
-                Token = _tokenService.GenerateJwtToken(user)
+                Token = await _tokenService.GenerateJwtToken(user)
             };
         }
 

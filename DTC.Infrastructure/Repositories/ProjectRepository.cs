@@ -28,5 +28,7 @@ namespace DTC.Infrastructure.Repositories
                 .Where(p => p.CreaterId == userId)
                 .ToListAsync();
         }
+
+        public async Task<ProjectStatus?> GetRegisterStatus() => await _context.Statuses.FirstOrDefaultAsync(s => s.Name == "Installed");
     }
 }

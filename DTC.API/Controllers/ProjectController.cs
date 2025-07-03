@@ -4,6 +4,7 @@ using DTC.Application.Interfaces;
 using DTC.Domain.Entities.Main;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 
 namespace DTC.API.Controllers
@@ -20,8 +21,7 @@ namespace DTC.API.Controllers
             _projectService = projectService;
             _env = webHostEnvironment;
         }
-
-        [Authorize(Roles = "2")] // Только авторы
+        [Authorize(Roles = "Author")]
         [HttpPost("create")]
         public async Task<IActionResult> Create([FromForm] CreateProjectDTO dto)
         {
@@ -34,6 +34,8 @@ namespace DTC.API.Controllers
                 ? await FileHandlers.SaveFileAsync(dto.ProjectFiles, "uploads/archives", _env.WebRootPath)
                 : null;
 
+            var status = await _projectService.GetRegisterStatus();
+
             var project = new Project
             {
                 Name = dto.Name,
@@ -42,7 +44,7 @@ namespace DTC.API.Controllers
                 Description = dto.Description,
                 ProjectTypeId = dto.ProjectType_ID,
                 AuthorGroupId = dto.AuthorGroup_ID,
-                StatusId = 1,
+                StatusId = status.Id,
                 CreatedAt = DateTime.UtcNow,
                 CreaterId = userId,
                 PhotoUrl = photoPath,
@@ -57,10 +59,11 @@ namespace DTC.API.Controllers
         [HttpGet("my-projects")]
         public async Task<IActionResult> GetMyProjects()
         {
+            if (!User.Identity.IsAuthenticated)
+                return Unauthorized("User is not authenticated");
             var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
             var projects = await _projectService.GetProjectsByUserAsync(userId);
             return Ok(projects);
         }
     }
-
 }

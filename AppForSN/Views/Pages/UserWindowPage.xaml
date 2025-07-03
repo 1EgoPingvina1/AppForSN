@@ -6,13 +6,57 @@
       xmlns:local="clr-namespace:AppForSNForUsers.Views.Pages"
       xmlns:controls="clr-namespace:AppForSNForUsers.Views.Shared"
       mc:Ignorable="d" 
-      d:DesignHeight="450" d:DesignWidth="800"
+      d:DesignHeight="600" d:DesignWidth="1000"
       Title="UserWindowPage">
 
-    <Grid>
+    <Grid Background="#1F1F2E">
         <Grid.RowDefinitions>
             <RowDefinition Height="70"/>
+            <!-- Header -->
+            <RowDefinition Height="*"/>
+            <!-- Content -->
         </Grid.RowDefinitions>
-        <controls:HeaderView/>
+
+        <!-- Header -->
+        <controls:HeaderView Grid.Row="0"/>
+
+        <!-- Content: Sidebar + Projects -->
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="220"/>
+                <!-- Sidebar -->
+                <ColumnDefinition Width="*"/>
+                <!-- Project Area -->
+            </Grid.ColumnDefinitions>
+
+            <!-- Sidebar Menu -->
+            <controls:DTC_SideBar/>
+
+            <!-- User Projects Area -->
+            <Border Grid.Column="1" Padding="16" Background="#262636">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <StackPanel>
+                        <TextBlock Text="Мои проекты" FontSize="20" Foreground="White" FontWeight="SemiBold" Margin="0 0 0 16"/>
+
+                        <!-- Пример проекта -->
+                        <ItemsControl ItemsSource="{Binding Projects}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Background="#383854" Padding="10" CornerRadius="8" Margin="0 0 0 10">
+                                        <StackPanel>
+                                            <TextBlock Text="{Binding Name}" Foreground="White" FontSize="16" FontWeight="Bold"/>
+                                            <TextBlock Text="{Binding Description}" Foreground="WhiteSmoke" FontSize="13"/>
+                                            <TextBlock Text="{Binding StatusName}" Foreground="#00FF9C" FontSize="13"/>
+                                        </StackPanel>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+
+                        <!-- Здесь можно динамически подгружать список -->
+                    </StackPanel>
+                </ScrollViewer>
+            </Border>
+        </Grid>
     </Grid>
 </Page>

@@ -8,6 +8,7 @@ namespace DTC.Application.Interfaces
     {
         Task<Project> CreateProjectAsync(Project project);
         Task<IEnumerable<Project>> GetProjectsByUserAsync(int userId);
+        Task<ProjectStatus?> GetRegisterStatus();
     }
 
 }

@@ -74,6 +74,33 @@ namespace DTC.Infrastructure.Migrations
                         .HasDatabaseName("RoleNameIndex");
 
                     b.ToTable("AspNetRoles", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Name = "Admin"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Name = "User"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Name = "Reviewer"
+                        },
+                        new
+                        {
+                            Id = 4,
+                            Name = "Manager"
+                        },
+                        new
+                        {
+                            Id = 5,
+                            Name = "Author"
+                        });
                 });
 
             modelBuilder.Entity("DTC.Domain.Entities.Identity.User", b =>
@@ -178,6 +205,197 @@ namespace DTC.Infrastructure.Migrations
                         .HasDatabaseName("UserNameIndex");
 
                     b.ToTable("AspNetUsers", (string)null);
+                });
+
+            modelBuilder.Entity("DTC.Domain.Entities.Main.AuthorGroup", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Photo")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("RegDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("RegUser_ID")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("AuthorGroups");
+                });
+
+            modelBuilder.Entity("DTC.Domain.Entities.Main.AuthorGroupMember", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("AuthorGroupId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("AuthorGroup_ID")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("AuthorId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Author_ID")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("JoinDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("LeaveDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("RegUser_ID")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AuthorGroupId");
+
+                    b.HasIndex("AuthorId");
+
+                    b.ToTable("AuthorGroupsMember");
+                });
+
+            modelBuilder.Entity("DTC.Domain.Entities.Main.Project", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("AuthorGroupId")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("CreaterId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("PhotoUrl")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("ProjectFiles")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("ProjectTypeId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("StatusId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Version")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("VersionDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AuthorGroupId");
+
+                    b.HasIndex("CreaterId");
+
+                    b.HasIndex("ProjectTypeId");
+
+                    b.HasIndex("StatusId");
+
+                    b.ToTable("Projects");
+                });
+
+            modelBuilder.Entity("DTC.Domain.Entities.Main.ProjectFile", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("FilePath")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("FileType")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("ProjectId")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("UploadDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProjectId");
+
+                    b.ToTable("ProjectFiles");
+                });
+
+            modelBuilder.Entity("DTC.Domain.Entities.Main.ProjectStatus", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Statuses");
+                });
+
+            modelBuilder.Entity("DTC.Domain.Entities.Main.ProjectType", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ProjectTypes");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<int>", b =>
@@ -310,6 +528,71 @@ namespace DTC.Infrastructure.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("DTC.Domain.Entities.Main.AuthorGroupMember", b =>
+                {
+                    b.HasOne("DTC.Domain.Entities.Main.AuthorGroup", "AuthorGroup")
+                        .WithMany("Members")
+                        .HasForeignKey("AuthorGroupId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("DTC.Domain.Entities.Identity.User", "Author")
+                        .WithMany()
+                        .HasForeignKey("AuthorId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Author");
+
+                    b.Navigation("AuthorGroup");
+                });
+
+            modelBuilder.Entity("DTC.Domain.Entities.Main.Project", b =>
+                {
+                    b.HasOne("DTC.Domain.Entities.Main.AuthorGroup", "Group")
+                        .WithMany()
+                        .HasForeignKey("AuthorGroupId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("DTC.Domain.Entities.Identity.User", "Creater")
+                        .WithMany()
+                        .HasForeignKey("CreaterId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("DTC.Domain.Entities.Main.ProjectType", "Type")
+                        .WithMany("Projects")
+                        .HasForeignKey("ProjectTypeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("DTC.Domain.Entities.Main.ProjectStatus", "Status")
+                        .WithMany()
+                        .HasForeignKey("StatusId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Creater");
+
+                    b.Navigation("Group");
+
+                    b.Navigation("Status");
+
+                    b.Navigation("Type");
+                });
+
+            modelBuilder.Entity("DTC.Domain.Entities.Main.ProjectFile", b =>
+                {
+                    b.HasOne("DTC.Domain.Entities.Main.Project", "Project")
+                        .WithMany()
+                        .HasForeignKey("ProjectId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Project");
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<int>", b =>
                 {
                     b.HasOne("DTC.Domain.Entities.Identity.Role", null)
@@ -375,6 +658,16 @@ namespace DTC.Infrastructure.Migrations
                     b.Navigation("RefreshTokens");
 
                     b.Navigation("Roles");
+                });
+
+            modelBuilder.Entity("DTC.Domain.Entities.Main.AuthorGroup", b =>
+                {
+                    b.Navigation("Members");
+                });
+
+            modelBuilder.Entity("DTC.Domain.Entities.Main.ProjectType", b =>
+                {
+                    b.Navigation("Projects");
                 });
 #pragma warning restore 612, 618
         }

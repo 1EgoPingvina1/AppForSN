@@ -4,10 +4,13 @@ using DTC.Domain.Entities.Identity;
 using DTC.Domain.Services;
 using DTC.Infrastructure;
 using DTC.Infrastructure.Data;
+using DTC.Infrastructure.Repositories;
 using DTC.Infrastructure.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using System.Text;
 
 namespace DTC.API
 {
@@ -21,34 +24,64 @@ namespace DTC.API
 
             builder.Services.AddControllers();
             builder.Services.AddDbContext<ApplicationDataBaseContext>(options =>
-                options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+                options.UseNpgsql(builder.Configuration.GetConnectionString("TestLocalDataBase")));
             builder.Services.AddIdentity<User, Role>(options =>
             {
                 options.Password.RequireDigit = true;
                 options.Password.RequiredLength = 8;
             }).AddEntityFrameworkStores<ApplicationDataBaseContext>()
               .AddDefaultTokenProviders();
-            builder.Services.AddScoped<UserManager<User>>();
-            builder.Services.AddScoped<SignInManager<User>>();
-            builder.Services.AddScoped<RoleManager<Role>>();
             builder.Services.AddScoped<IAuthService, AuthService>();
             builder.Services.AddScoped<ITokenService, TokenService>();
+            builder.Services.AddScoped<IProjectRepository, ProjectRepository>();
             builder.Services.AddDomainServices();
-            builder.Services.AddSwaggerGen(c =>
+            builder.Services.AddSwaggerGen(options =>
             {
-                c.SwaggerDoc("v1", new OpenApiInfo
+                options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
                 {
-                    Title = "My Web API",
-                    Version = "v1",
-                    Description = "Description of my API",
-                    Contact = new OpenApiContact
-                    {
-                        Name = "Developer Name",
-                        Email = "dev@example.com"
-                    }
+                    Description = "JWT авторизация. Пример: Bearer {токен}",
+                    Name = "Authorization",
+                    In = ParameterLocation.Header,
+                    Type = SecuritySchemeType.Http,
+                    Scheme = "Bearer"
                 });
 
+                options.AddSecurityRequirement(new OpenApiSecurityRequirement
+                {
+                {
+                    new OpenApiSecurityScheme
+                    {
+                        Reference = new OpenApiReference
+                    {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            new string[] {}
+            }
+                });
             });
+
+            builder.Services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = "Bearer";
+                options.DefaultChallengeScheme = "Bearer";
+            })
+.AddJwtBearer("Bearer", options =>
+{
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+        ValidIssuer = builder.Configuration["JwtSettings:Issuer"],
+        ValidAudience = builder.Configuration["JwtSettings:Audience"],
+        IssuerSigningKey = new SymmetricSecurityKey(
+            Encoding.UTF8.GetBytes(builder.Configuration["JwtSettings:Secret"]))
+    };
+});
+
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
@@ -64,8 +97,8 @@ namespace DTC.API
 
             app.UseHttpsRedirection();
 
+            app.UseAuthentication();
             app.UseAuthorization();
-
             app.MapControllers();
 
             app.Run();

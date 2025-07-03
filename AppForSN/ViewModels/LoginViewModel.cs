@@ -59,6 +59,7 @@ namespace AppForSNForUsers.ViewModels
                 {
                     Password = string.Empty;
                     LoginSucceeded?.Invoke();
+                    App.CurrentUserToken = user.Token;
                     _mainViewModel.Navigate("Home");
                 }
                 ErrorMessage = "Неверный логин / пароль";
