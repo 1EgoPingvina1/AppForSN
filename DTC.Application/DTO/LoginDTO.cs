@@ -1,4 +1,4 @@
-﻿namespace DTC.API.DTO
+﻿namespace DTC.Application.DTO
 {
     public class LoginDTO
     {

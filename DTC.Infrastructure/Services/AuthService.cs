@@ -1,13 +1,12 @@
-﻿using DTC.API.DTO;
-using DTC.API.ErrorHandlers;
+﻿using DTC.Application.DTO;
+using DTC.Application.ErrorHandlers;
+using DTC.Application.Interfaces;
 using DTC.Domain.Entities.Identity;
-using DTC.Domain.Interfaces;
 using DTC.Infrastructure.Data;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using System.Security.Cryptography;
 
-namespace DTC.Infrastructure.Services
+namespace DTC.Domain.Services
 {
     public class AuthService : IAuthService
     {
@@ -60,7 +59,7 @@ namespace DTC.Infrastructure.Services
         {
             var user = await _userManager.FindByNameAsync(login.Username);
             if (user is null)
-                throw new HttpExeption(StatusCodes.Status401Unauthorized, "Invalid username or password");
+                throw new HttpExeption(401, "Invalid username or password");
             await _signInManager.CheckPasswordSignInAsync(user, login.Password, false);
 
             return new UserDTO

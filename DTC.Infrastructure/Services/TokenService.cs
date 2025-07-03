@@ -1,5 +1,5 @@
-﻿using DTC.Domain.Entities.Identity;
-using DTC.Domain.Interfaces;
+﻿using DTC.Application.Interfaces;
+using DTC.Domain.Entities.Identity;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;

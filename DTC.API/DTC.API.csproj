@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <TargetFramework>net9.0</TargetFramework>
@@ -19,8 +19,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\DTC.Application\DTC.Application.csproj" />
-    <ProjectReference Include="..\DTC.Infrastructure\DTC.Infrastructure.csproj" />
+	  <ProjectReference Include="..\DTC.Infrastructure\DTC.Infrastructure.csproj" />
+	  <ProjectReference Include="..\DTC.Application\DTC.Application.csproj" />
+
   </ItemGroup>
 
 </Project>

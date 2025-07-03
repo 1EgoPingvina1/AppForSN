@@ -1,8 +1,7 @@
 ﻿using AppForSNForUsers.Services;
-using System;
-using System.Collections.Generic;
+using AppForSNForUsers.ViewModels;
+using System.Net.Http;
 using System.Windows;
-using System.Windows.Controls;
 
 namespace AppForSNForUsers.Views.Dashboard
 {
@@ -11,31 +10,14 @@ namespace AppForSNForUsers.Views.Dashboard
     /// </summary>
     public partial class MainDashboardView : Window
     {
-        private readonly ApiClient _apiClient;
 
-        public MainDashboardView(ApiClient apiClient)
+        public MainDashboardView()
         {
             InitializeComponent();
-            DataContext = new MainDashboardView(apiClient);
-        }
+            var httpClient = new HttpClient();
+            var authService = new AuthService(httpClient);
+            DataContext = new MainViewModel(authService);
 
-        private async void GetProjects_Click(object sender, RoutedEventArgs e)
-        {
-            try
-            {
-                var projects = await _apiClient.GetAsync<List<Project>>("/api/projects");
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Ошибка: " + ex.Message);
-            }
         }
-    }
-
-    public class Project
-    {
-        public int Id { get; set; }
-        public string Name { get; set; }
-        public string Version { get; set; }
     }
 }

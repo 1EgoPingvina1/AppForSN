@@ -1,5 +1,4 @@
-﻿using DTC.Domain.Interfaces;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 
 namespace DTC.Domain
 {

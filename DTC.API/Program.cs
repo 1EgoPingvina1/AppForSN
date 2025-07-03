@@ -1,6 +1,7 @@
+using DTC.Application.Interfaces;
 using DTC.Domain;
 using DTC.Domain.Entities.Identity;
-using DTC.Domain.Interfaces;
+using DTC.Domain.Services;
 using DTC.Infrastructure;
 using DTC.Infrastructure.Data;
 using DTC.Infrastructure.Services;

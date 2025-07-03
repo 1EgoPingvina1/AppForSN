@@ -22,7 +22,7 @@ namespace DTC.Infrastructure.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("DTC.Domain.Entities.RefreshToken", b =>
+            modelBuilder.Entity("DTC.Domain.Entities.Identity.RefreshToken", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -47,7 +47,7 @@ namespace DTC.Infrastructure.Migrations
                     b.ToTable("RefreshTokens");
                 });
 
-            modelBuilder.Entity("DTC.Domain.Entities.Role", b =>
+            modelBuilder.Entity("DTC.Domain.Entities.Identity.Role", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -76,7 +76,7 @@ namespace DTC.Infrastructure.Migrations
                     b.ToTable("AspNetRoles", (string)null);
                 });
 
-            modelBuilder.Entity("DTC.Domain.Entities.User", b =>
+            modelBuilder.Entity("DTC.Domain.Entities.Identity.User", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -264,8 +264,6 @@ namespace DTC.Infrastructure.Migrations
 
                     b.HasKey("UserId", "RoleId");
 
-                    b.HasIndex("RoleId");
-
                     b.ToTable("AspNetUserRoles", (string)null);
 
                     b.HasDiscriminator().HasValue("IdentityUserRole<int>");
@@ -292,26 +290,18 @@ namespace DTC.Infrastructure.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("DTC.Domain.Entities.UserRoles", b =>
+            modelBuilder.Entity("DTC.Domain.Entities.Identity.UserRoles", b =>
                 {
                     b.HasBaseType("Microsoft.AspNetCore.Identity.IdentityUserRole<int>");
 
-                    b.Property<int>("RoleId1")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("UserId1")
-                        .HasColumnType("integer");
-
-                    b.HasIndex("RoleId1");
-
-                    b.HasIndex("UserId1");
+                    b.HasIndex("RoleId");
 
                     b.HasDiscriminator().HasValue("UserRoles");
                 });
 
-            modelBuilder.Entity("DTC.Domain.Entities.RefreshToken", b =>
+            modelBuilder.Entity("DTC.Domain.Entities.Identity.RefreshToken", b =>
                 {
-                    b.HasOne("DTC.Domain.Entities.User", "User")
+                    b.HasOne("DTC.Domain.Entities.Identity.User", "User")
                         .WithMany("RefreshTokens")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -322,7 +312,7 @@ namespace DTC.Infrastructure.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<int>", b =>
                 {
-                    b.HasOne("DTC.Domain.Entities.Role", null)
+                    b.HasOne("DTC.Domain.Entities.Identity.Role", null)
                         .WithMany()
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -331,7 +321,7 @@ namespace DTC.Infrastructure.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<int>", b =>
                 {
-                    b.HasOne("DTC.Domain.Entities.User", null)
+                    b.HasOne("DTC.Domain.Entities.Identity.User", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -340,22 +330,7 @@ namespace DTC.Infrastructure.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<int>", b =>
                 {
-                    b.HasOne("DTC.Domain.Entities.User", null)
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<int>", b =>
-                {
-                    b.HasOne("DTC.Domain.Entities.Role", null)
-                        .WithMany()
-                        .HasForeignKey("RoleId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("DTC.Domain.Entities.User", null)
+                    b.HasOne("DTC.Domain.Entities.Identity.User", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -364,24 +339,24 @@ namespace DTC.Infrastructure.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<int>", b =>
                 {
-                    b.HasOne("DTC.Domain.Entities.User", null)
+                    b.HasOne("DTC.Domain.Entities.Identity.User", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("DTC.Domain.Entities.UserRoles", b =>
+            modelBuilder.Entity("DTC.Domain.Entities.Identity.UserRoles", b =>
                 {
-                    b.HasOne("DTC.Domain.Entities.Role", "Role")
+                    b.HasOne("DTC.Domain.Entities.Identity.Role", "Role")
                         .WithMany("UserRoles")
-                        .HasForeignKey("RoleId1")
+                        .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("DTC.Domain.Entities.User", "User")
+                    b.HasOne("DTC.Domain.Entities.Identity.User", "User")
                         .WithMany("Roles")
-                        .HasForeignKey("UserId1")
+                        .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -390,12 +365,12 @@ namespace DTC.Infrastructure.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("DTC.Domain.Entities.Role", b =>
+            modelBuilder.Entity("DTC.Domain.Entities.Identity.Role", b =>
                 {
                     b.Navigation("UserRoles");
                 });
 
-            modelBuilder.Entity("DTC.Domain.Entities.User", b =>
+            modelBuilder.Entity("DTC.Domain.Entities.Identity.User", b =>
                 {
                     b.Navigation("RefreshTokens");
 

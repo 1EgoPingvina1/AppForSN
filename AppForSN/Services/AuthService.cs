@@ -1,16 +1,13 @@
 ﻿using AppForSNForUsers.Contracts;
 using AppForSNForUsers.DTOs;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Json;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace AppForSNForUsers.Services
 {
-    public class AuthService
+    public class AuthService : IAuthService
     {
         private readonly HttpClient _httpClient;
 
@@ -31,7 +28,7 @@ namespace AppForSNForUsers.Services
 
         public async Task<UserDTO> LoginAsync(LoginDTO loginDTO)
         {
-            var response = await _httpClient.PostAsJsonAsync("account/login", loginDTO);
+            var response = await _httpClient.PostAsJsonAsync("https://localhost:5080/api/Account/login", loginDTO);
 
             if (!response.IsSuccessStatusCode)
             {

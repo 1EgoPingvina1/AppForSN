@@ -1,5 +1,5 @@
-﻿using DTC.API.DTO;
-using DTC.Domain.Interfaces;
+﻿using DTC.Application.DTO;
+using DTC.Application.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DTC.API.Controllers

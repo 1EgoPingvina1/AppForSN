@@ -1,6 +1,7 @@
-﻿using DTC.API.DTO;
+﻿
+using DTC.Application.DTO;
 
-namespace DTC.Domain.Interfaces
+namespace DTC.Application.Interfaces
 {
     public interface IAuthService
     {

@@ -8,13 +8,4 @@
     <Color x:Key="SteamOrange">#E35E1C</Color>
     <Color x:Key="SteamWhite">#FFFFFF</Color>
     <Color x:Key="SteamBlack">#000000</Color>
-
-    <SolidColorBrush x:Key="SteamDarkBrush" Color="{StaticResource SteamDark}"/>
-    <SolidColorBrush x:Key="SteamBlueBrush" Color="{StaticResource SteamBlue}"/>
-    <SolidColorBrush x:Key="SteamLightBlueBrush" Color="{StaticResource SteamLightBlue}"/>
-    <SolidColorBrush x:Key="SteamGrayBrush" Color="{StaticResource SteamGray}"/>
-    <SolidColorBrush x:Key="SteamGreenBrush" Color="{StaticResource SteamGreen}"/>
-    <SolidColorBrush x:Key="SteamOrangeBrush" Color="{StaticResource SteamOrange}"/>
-    <SolidColorBrush x:Key="SteamWhiteBrush" Color="{StaticResource SteamWhite}"/>
-    <SolidColorBrush x:Key="SteamBlackBrush" Color="{StaticResource SteamBlack}"/>
 </ResourceDictionary>

@@ -1,4 +1,4 @@
-﻿namespace DTC.API.ErrorHandlers
+﻿namespace DTC.Application.ErrorHandlers
 {
     public class ApiExeption
     {

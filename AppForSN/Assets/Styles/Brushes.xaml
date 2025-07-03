@@ -1,0 +1,16 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary Source="Colors.xaml"/>
+    </ResourceDictionary.MergedDictionaries>
+
+
+    <SolidColorBrush x:Key="SteamDarkBrush" Color="{StaticResource SteamDark}"/>
+    <SolidColorBrush x:Key="SteamBlueBrush" Color="{StaticResource SteamBlue}"/>
+    <SolidColorBrush x:Key="SteamLightBlueBrush" Color="{StaticResource SteamLightBlue}"/>
+    <SolidColorBrush x:Key="SteamGrayBrush" Color="{StaticResource SteamGray}"/>
+    <SolidColorBrush x:Key="SteamGreenBrush" Color="{StaticResource SteamGreen}"/>
+    <SolidColorBrush x:Key="SteamOrangeBrush" Color="{StaticResource SteamOrange}"/>
+    <SolidColorBrush x:Key="SteamWhiteBrush" Color="{StaticResource SteamWhite}"/>
+    <SolidColorBrush x:Key="SteamBlackBrush" Color="{StaticResource SteamBlack}"/>
+</ResourceDictionary>

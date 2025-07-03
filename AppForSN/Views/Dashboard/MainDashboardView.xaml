@@ -6,27 +6,19 @@
         xmlns:local="clr-namespace:AppForSNForUsers.Views.Dashboard"
         xmlns:shared="clr-namespace:AppForSNForUsers.Views.Shared"
         mc:Ignorable="d"
-        Title="MainDashboardView"
         MinWidth="600" MinHeight="400"
-        d:DesignHeight="450" d:DesignWidth="800"
-        WindowStyle="None">
-
+        d:DesignHeight="450" d:DesignWidth="800">
     <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="Auto"/>
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
+        
+        <Frame Grid.Column="1" Grid.Row="1" NavigationUIVisibility="Hidden" Content="{Binding CurrentView}"/>
 
-        <!-- Боковое меню -->
-        <StackPanel Grid.Column="0" Background="#2A475E" Width="200">
-            <Button Content="Главная" Command="{Binding NavigateCommand}" CommandParameter="Home"/>
-            <Button Content="Профиль" Command="{Binding NavigateCommand}" CommandParameter="Profile"/>
-            <Button Content="Настройки" Command="{Binding NavigateCommand}" CommandParameter="Settings"/>
-        </StackPanel>
-
-        <!-- Контейнер для страниц -->
-        <Frame Grid.Column="1" 
-               NavigationUIVisibility="Hidden"
-               Content="{Binding CurrentPage}"/>
     </Grid>
 </Window>

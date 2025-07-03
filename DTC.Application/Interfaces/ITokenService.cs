@@ -1,6 +1,7 @@
-﻿using DTC.Domain.Entities.Identity;
+﻿
+using DTC.Domain.Entities.Identity;
 
-namespace DTC.Domain.Interfaces
+namespace DTC.Application.Interfaces
 {
     public interface ITokenService
     {

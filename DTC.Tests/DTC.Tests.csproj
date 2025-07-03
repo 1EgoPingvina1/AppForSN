@@ -20,7 +20,6 @@
   <ItemGroup>
     <ProjectReference Include="..\DTC.Domain\DTC.Domain.csproj" />
     <ProjectReference Include="..\DTC.Infrastructure\DTC.Infrastructure.csproj" />
-    <ProjectReference Include="..\DTC.Shared\DTC.Shared.csproj" />
   </ItemGroup>
 
   <ItemGroup>

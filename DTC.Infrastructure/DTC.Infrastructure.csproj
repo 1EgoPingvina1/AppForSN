@@ -7,6 +7,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Repositories\4qeuo0tc.0sm~" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Identity" Version="2.3.1" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="9.0.6" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.6">
@@ -19,12 +23,12 @@
     </PackageReference>
     <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="9.0.6" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.4" />
-    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.12.0" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\DTC.Domain\DTC.Domain.csproj" />
-    <ProjectReference Include="..\DTC.Shared\DTC.Shared.csproj" />
+	  <ProjectReference Include="..\DTC.Application\DTC.Application.csproj" />
+	  <ProjectReference Include="..\DTC.Domain\DTC.Domain.csproj" />
+
   </ItemGroup>
 
 </Project>

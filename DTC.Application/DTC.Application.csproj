@@ -7,8 +7,17 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\DTC.Domain\DTC.Domain.csproj" />
-    <ProjectReference Include="..\DTC.Infrastructure\DTC.Infrastructure.csproj" />
+    <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="12.0.1" />
+    <PackageReference Include="Microsoft.AspNetCore.Http.Features" Version="5.0.17" />
+  </ItemGroup>
+
+  <ItemGroup>
+	  <ProjectReference Include="..\DTC.Domain\DTC.Domain.csproj" />
+
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="AutoMapper\" />
   </ItemGroup>
 
 </Project>

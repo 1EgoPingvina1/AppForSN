@@ -1,0 +1,25 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    
+    
+    <Style x:Key="HeaderTextStyle" TargetType="TextBlock">
+        <Setter Property="FontSize" Value="24"/>
+        <Setter Property="FontWeight" Value="Bold"/>
+        <Setter Property="Foreground" Value="{StaticResource SteamLightBlueBrush}"/>
+        <Setter Property="TextOptions.TextFormattingMode" Value="Display"/>
+    </Style>
+
+    <Style x:Key="SubheaderTextStyle" TargetType="TextBlock">
+        <Setter Property="FontSize" Value="18"/>
+        <Setter Property="FontWeight" Value="SemiBold"/>
+        <Setter Property="Foreground" Value="{StaticResource SteamGrayBrush}"/>
+        <Setter Property="TextOptions.TextFormattingMode" Value="Display"/>
+    </Style>
+
+    <Style x:Key="NormalTextStyle" TargetType="TextBlock">
+        <Setter Property="FontSize" Value="14"/>
+        <Setter Property="Foreground" Value="{StaticResource SteamGrayBrush}"/>
+        <Setter Property="TextWrapping" Value="Wrap"/>
+        <Setter Property="TextOptions.TextFormattingMode" Value="Display"/>
+    </Style>
+</ResourceDictionary>

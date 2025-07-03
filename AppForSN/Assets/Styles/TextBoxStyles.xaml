@@ -1,0 +1,59 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- Базовый стиль кнопки с анимациями -->
+    <Style x:Key="SteamBaseButtonStyle" TargetType="Button">
+        <Setter Property="Foreground" Value="{StaticResource SteamWhiteBrush}"/>
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="Padding" Value="14 8"/>
+        <Setter Property="FontSize" Value="14"/>
+        <Setter Property="FontWeight" Value="Medium"/>
+        <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="SnapsToDevicePixels" Value="True"/>
+        <Setter Property="RenderOptions.BitmapScalingMode" Value="HighQuality"/>
+    </Style>
+
+    <!-- Основная кнопка с анимацией свечения -->
+    <Style x:Key="SteamPrimaryButton" TargetType="Button" BasedOn="{StaticResource SteamBaseButtonStyle}">
+        <Setter Property="Background" Value="#4C51BF"/>
+        <Setter Property="Effect">
+            <Setter.Value>
+                <DropShadowEffect x:Name="glowEffect" 
+                                BlurRadius="8" 
+                                ShadowDepth="2" 
+                                Opacity="0.3" 
+                                Color="#66C0F4"/>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- Вторичная кнопка с анимацией границы -->
+    <Style x:Key="SteamSecondaryButton" TargetType="Button" BasedOn="{StaticResource SteamBaseButtonStyle}">
+        <Setter Property="Background" Value="#2A475E"/>
+        <Setter Property="BorderBrush" Value="#3D4D5E"/>
+        <Setter Property="BorderThickness" Value="1"/>
+    </Style>
+
+    <!-- Стиль текстового поля с анимацией -->
+    <Style x:Key="SteamTextBoxStyle" TargetType="TextBox">
+        <Setter Property="Background" Value="White"/>
+        <Setter Property="BorderBrush" Value="#E2E8F0"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="Foreground" Value="{StaticResource SteamGrayBrush}"/>
+        <Setter Property="FontSize" Value="14"/>
+        <Setter Property="Padding" Value="8"/>
+        <Setter Property="SnapsToDevicePixels" Value="True"/>
+    </Style>
+
+    <!-- Стиль PasswordBox с анимацией -->
+    <Style x:Key="SteamPasswordBoxStyle" TargetType="PasswordBox">
+        <Setter Property="Background" Value="White"/>
+        <Setter Property="BorderBrush" Value="#E2E8F0"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="Foreground" Value="{StaticResource SteamGrayBrush}"/>
+        <Setter Property="FontFamily" Value="Segoe UI, Arial"/>
+        <Setter Property="FontSize" Value="14"/>
+        <Setter Property="Padding" Value="8"/>
+        <Setter Property="SnapsToDevicePixels" Value="True"/>
+    </Style>
+</ResourceDictionary>

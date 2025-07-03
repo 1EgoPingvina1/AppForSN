@@ -1,4 +1,5 @@
 ﻿using AppForSNForUsers.Contracts;
+using AppForSNForUsers.Views.Authorization;
 using AppForSNForUsers.Views.Pages;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
@@ -8,32 +9,36 @@ namespace AppForSNForUsers.ViewModels
 {
     public class MainViewModel : INotifyPropertyChanged
     {
-        private object _currentPage;
-        public object CurrentPage
-        {
-            get => _currentPage;
-            set
-            {
-                _currentPage = value;
-                OnPropertyChanged();
-            }
-        }
-
+        private readonly IAuthService _authService;
         public ICommand NavigateCommand { get; }
 
-        public MainViewModel()
+        private object _currentView;
+        public object CurrentView
         {
-            NavigateCommand = new NavigateCommand(Navigate);
-            // Стартовая страница
-            CurrentPage = new HomePage();
+            get => _currentView;
+            set { _currentView = value; OnPropertyChanged(nameof(CurrentView)); }
         }
 
-        private void Navigate(object page)
+        public MainViewModel(IAuthService authService)
         {
-            switch (page)
+            _authService = authService;
+            NavigateCommand = new RelayCommand<string>(param => Navigate(param));
+            Navigate("Login");
+        }
+
+        public void Navigate(string viewName)
+        {
+            switch (viewName)
             {
                 case "Home":
-                    CurrentPage = new HomePage();
+                    CurrentView = new HomePage(); 
+                    break;
+
+                case "Login":
+                    CurrentView = new LoginView(this,_authService); 
+                    break;
+                case "Register":
+                    CurrentView = new RegisterView();
                     break;
             }
         }

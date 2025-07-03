@@ -1,8 +1,6 @@
 ﻿using AppForSNForUsers.Contracts;
 using AppForSNForUsers.DTOs;
-using AppForSNForUsers.Services;
 using AppForSNForUsers.Views.Authorization;
-using AppForSNForUsers.Views.Dashboard;
 using System;
 using System.ComponentModel;
 using System.Net.Http;
@@ -15,17 +13,18 @@ namespace AppForSNForUsers.ViewModels
 {
     public class LoginViewModel : INotifyPropertyChanged
     {
-        private readonly AuthService _authService;
+        private readonly IAuthService _authService;
+        private readonly MainViewModel _mainViewModel;
 
-        // Это событие будет вызвано при успешной авторизации
         public event Action LoginSucceeded;
 
-        public LoginViewModel(AuthService authService)
+        public LoginViewModel(MainViewModel mainViewModel, IAuthService authService)
         {
             _authService = authService;
-            LoginCommand = new RelayCommand(async () => await LoginAsync(), () => true);
+            _mainViewModel = mainViewModel;
+            LoginCommand = new RelayCommand<object>(async _ => await LoginAsync(), _ => true);
+            NavigateToRegistrationCommand = new RelayCommand<object>(_ => OpenRegistrationWindow(), _ => true);
 
-            NavigateToRegistrationCommand = new RelayCommand(OpenRegistrationWindow);
         }
 
         private string _username;
@@ -56,9 +55,13 @@ namespace AppForSNForUsers.ViewModels
             {
                 var dto = new LoginDTO { Username = Username, Password = Password };
                 var user = await _authService.LoginAsync(dto);
-                ErrorMessage = $"Добро пожаловать, {user.Username}";
-
-                LoginSucceeded?.Invoke(); // Сообщаем о входе
+                if(user != null) 
+                {
+                    Password = string.Empty;
+                    LoginSucceeded?.Invoke();
+                    _mainViewModel.Navigate("Home");
+                }
+                ErrorMessage = "Неверный логин / пароль";
             }
             catch (HttpRequestException ex)
             {
@@ -70,13 +73,10 @@ namespace AppForSNForUsers.ViewModels
             }
         }
 
+
         private void OpenRegistrationWindow()
         {
-            Application.Current.Dispatcher.Invoke(() =>
-            {
-                var registerView = new RegisterView(); // Убедись, что это Window
-                registerView.Show();
-            });
+            _mainViewModel.Navigate("Register");
         }
 
         public event PropertyChangedEventHandler PropertyChanged;

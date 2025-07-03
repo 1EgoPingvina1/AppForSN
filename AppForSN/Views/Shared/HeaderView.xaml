@@ -34,19 +34,11 @@
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
 
-            <!-- Логотип -->
-            <!--<Image Source="/Assets/Images/logo_small.png" 
-                   Height="40" 
-                   Grid.Column="0"
-                   Stretch="Uniform"/>-->
-
-            <!-- Название приложения -->
             <TextBlock Text="DTC Social Network" 
                        Style="{StaticResource HeaderTextStyle}"
                        Grid.Column="1" 
                        Margin="20,0,0,0"/>
 
-            <!-- Информация о пользователе -->
             <StackPanel Orientation="Horizontal" 
                         Grid.Column="2" 
                         HorizontalAlignment="Right"
@@ -54,22 +46,6 @@
 
                 <TextBlock Text="{Binding CurrentUser.DisplayName}" 
                            Style="{StaticResource UserInfoTextStyle}"/>
-
-                <!-- Аватар пользователя -->
-                <Border Width="40" 
-                        Height="40" 
-                        CornerRadius="20" 
-                        Background="White" 
-                        BorderBrush="LightGray"
-                        BorderThickness="1">
-                    <Image Source="{Binding CurrentUser.Avatar}" 
-                           Stretch="UniformToFill"
-                           ClipToBounds="True">
-                        <Image.Clip>
-                            <EllipseGeometry RadiusX="20" RadiusY="20" Center="20,20"/>
-                        </Image.Clip>
-                    </Image>
-                </Border>
             </StackPanel>
         </Grid>
     </Border>

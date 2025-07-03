@@ -38,8 +38,8 @@ namespace DTC.Infrastructure.Migrations
                     LastName = table.Column<string>(type: "text", nullable: false),
                     Gender = table.Column<string>(type: "text", nullable: false),
                     IsAuthor = table.Column<bool>(type: "boolean", nullable: false),
-                    Avatar = table.Column<byte[]>(type: "bytea", nullable: false),
-                    Description = table.Column<string>(type: "text", nullable: false),
+                    Avatar = table.Column<byte[]>(type: "bytea", nullable: true),
+                    Description = table.Column<string>(type: "text", nullable: true),
                     Birthday = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     BlockDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
@@ -132,9 +132,7 @@ namespace DTC.Infrastructure.Migrations
                 {
                     UserId = table.Column<int>(type: "integer", nullable: false),
                     RoleId = table.Column<int>(type: "integer", nullable: false),
-                    Discriminator = table.Column<string>(type: "character varying(21)", maxLength: 21, nullable: false),
-                    UserId1 = table.Column<int>(type: "integer", nullable: true),
-                    RoleId1 = table.Column<int>(type: "integer", nullable: true)
+                    Discriminator = table.Column<string>(type: "character varying(21)", maxLength: 21, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -146,20 +144,8 @@ namespace DTC.Infrastructure.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_AspNetUserRoles_AspNetRoles_RoleId1",
-                        column: x => x.RoleId1,
-                        principalTable: "AspNetRoles",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
                         name: "FK_AspNetUserRoles_AspNetUsers_UserId",
                         column: x => x.UserId,
-                        principalTable: "AspNetUsers",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_AspNetUserRoles_AspNetUsers_UserId1",
-                        column: x => x.UserId1,
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -231,16 +217,6 @@ namespace DTC.Infrastructure.Migrations
                 name: "IX_AspNetUserRoles_RoleId",
                 table: "AspNetUserRoles",
                 column: "RoleId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_AspNetUserRoles_RoleId1",
-                table: "AspNetUserRoles",
-                column: "RoleId1");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_AspNetUserRoles_UserId1",
-                table: "AspNetUserRoles",
-                column: "UserId1");
 
             migrationBuilder.CreateIndex(
                 name: "EmailIndex",
