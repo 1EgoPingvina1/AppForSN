@@ -55,5 +55,22 @@
         <Setter Property="BorderBrush" Value="#3D4D5E"/>
         <Setter Property="BorderThickness" Value="1"/>
     </Style>
-    
+
+
+
+    <Style x:Key="SteamDatePickerStyle" TargetType="DatePicker">
+        <Setter Property="FontSize" Value="14"/>
+        <Setter Property="Padding" Value="10,5"/>
+        <Setter Property="BorderBrush" Value="#ccc"/>
+        <Setter Property="BorderThickness" Value="1"/>
+    </Style>
+
+
+    <Style x:Key="SteamComboBoxStyle" TargetType="ComboBox">
+        <Setter Property="FontSize" Value="14"/>
+        <Setter Property="Padding" Value="10,5"/>
+        <Setter Property="BorderBrush" Value="#ccc"/>
+        <Setter Property="BorderThickness" Value="1"/>
+    </Style>
+
 </ResourceDictionary>

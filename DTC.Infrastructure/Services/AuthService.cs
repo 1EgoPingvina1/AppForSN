@@ -36,7 +36,7 @@ namespace DTC.Domain.Services
                 LastName = registerDTO.LastName,
                 Gender = registerDTO.Gender,
                 IsAuthor = registerDTO.IsAuthor,
-                Birthday = registerDTO.Birthday,
+                Birthday = registerDTO.Birthday.ToUniversalTime(),
                 UserName = registerDTO.Username,
                 EmailConfirmed = false,
                 SecurityStamp = Guid.NewGuid().ToString()

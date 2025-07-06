@@ -13,8 +13,8 @@ namespace AppForSNForUsers.ViewModels
         public SideBarViewModel(MainViewModel mainViewModel)
         {
             _mainViewModel = mainViewModel;
-            NavigateCommand = new RelayCommand<string>(param => _mainViewModel.Navigate(param));
-            LogoutCommand = new RelayCommand<object>(_ => Logout(), _ => true);
+            NavigateCommand = new RelayCommand(() => _mainViewModel.Navigate("Home")); // или нужный параметр
+            LogoutCommand = new RelayCommand(() => Logout());
         }
 
         private void Logout()

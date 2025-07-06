@@ -40,6 +40,20 @@ namespace AppForSNForUsers.Services
             return user;
         }
 
+        public async Task<UserDTO> RegisterAsync(RegisterDTO registerDTO)
+        {
+            var response = await _httpClient.PostAsJsonAsync("https://localhost:5080/api/Account/register", registerDTO);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                var error = await response.Content.ReadAsStringAsync();
+                throw new HttpRequestException($"Server returned error: {error}");
+            }
+
+            var user = await response.Content.ReadFromJsonAsync<UserDTO>();
+            return user;
+        }
+
         public Task LogoutAsync()
         {
             throw new NotImplementedException();

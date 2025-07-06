@@ -1,6 +1,5 @@
 ﻿using AppForSNForUsers.Contracts;
 using AppForSNForUsers.DTOs;
-using AppForSNForUsers.Views.Authorization;
 using System;
 using System.ComponentModel;
 using System.Net.Http;
@@ -16,14 +15,15 @@ namespace AppForSNForUsers.ViewModels
         private readonly IAuthService _authService;
         private readonly MainViewModel _mainViewModel;
 
-        public event Action LoginSucceeded;
 
+        public ICommand LoginCommand { get; }
+        public RelayCommand NavigateToRegistrationCommand { get; }
         public LoginViewModel(MainViewModel mainViewModel, IAuthService authService)
         {
             _authService = authService;
             _mainViewModel = mainViewModel;
-            LoginCommand = new RelayCommand<object>(async _ => await LoginAsync(), _ => true);
-            NavigateToRegistrationCommand = new RelayCommand<object>(_ => OpenRegistrationWindow(), _ => true);
+            LoginCommand = new RelayCommand(async () => await LoginAsync());
+            NavigateToRegistrationCommand = new RelayCommand(OpenRegistrationWindow);
 
         }
 
@@ -43,9 +43,7 @@ namespace AppForSNForUsers.ViewModels
             set { _errorMessage = value; OnPropertyChanged(); }
         }
 
-        public ICommand LoginCommand { get; }
 
-        public ICommand NavigateToRegistrationCommand { get; set; }
 
         private async Task LoginAsync()
         {
@@ -58,7 +56,6 @@ namespace AppForSNForUsers.ViewModels
                 if(user != null) 
                 {
                     Password = string.Empty;
-                    LoginSucceeded?.Invoke();
                     App.CurrentUserToken = user.Token;
                     _mainViewModel.Navigate("Home");
                 }

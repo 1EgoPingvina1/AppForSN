@@ -22,7 +22,7 @@ namespace AppForSNForUsers.ViewModels
         public MainViewModel(IAuthService authService)
         {
             _authService = authService;
-            NavigateCommand = new RelayCommand<string>(param => Navigate(param));
+            NavigateCommand = new RelayCommand(() => Navigate("Login")); 
             Navigate("Login");
         }
 
@@ -38,7 +38,7 @@ namespace AppForSNForUsers.ViewModels
                     CurrentView = new LoginView(this,_authService); 
                     break;
                 case "Register":
-                    CurrentView = new RegisterView();
+                    CurrentView = new RegisterView(this,_authService);
                     break;
             }
         }

@@ -119,6 +119,7 @@
     <Compile Include="Settings.cs" />
     <Compile Include="ViewModels\LoginViewModel.cs" />
     <Compile Include="ViewModels\MainViewModel.cs" />
+    <Compile Include="ViewModels\RegisterViewModel.cs" />
     <Compile Include="ViewModels\SideBarViewModel.cs" />
     <Compile Include="ViewModels\UserProjectsViewModel.cs" />
     <Compile Include="Views\Authorization\RegisterView.xaml.cs">

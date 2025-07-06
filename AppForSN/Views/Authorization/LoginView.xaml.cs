@@ -28,5 +28,14 @@ namespace AppForSNForUsers.Views.Authorization
                     loginViewModel.LoginCommand.Execute(null);
             }
         }
+
+        private void MoveToRegister_Navigation(object sender, RoutedEventArgs e)
+        {
+            if (DataContext is LoginViewModel loginViewModel)
+            {
+                if (loginViewModel.NavigateToRegistrationCommand.CanExecute(null))
+                    loginViewModel.NavigateToRegistrationCommand.Execute(null);
+            }
+        }
     }
 }

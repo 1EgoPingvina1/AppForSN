@@ -3,48 +3,28 @@ using System.Windows.Input;
 
 namespace AppForSNForUsers.Contracts
 {
-    public class RelayCommand<T> : ICommand
+    public class RelayCommand : ICommand
     {
-        private readonly Action<T> _execute;
-        private readonly Predicate<T> _canExecute;
+        private readonly Action _execute;
+        private readonly Func<bool> _canExecute;
 
-        public RelayCommand(Action<T> execute, Predicate<T> canExecute = null)
+        public RelayCommand(Action execute, Func<bool> canExecute = null)
         {
             _execute = execute ?? throw new ArgumentNullException(nameof(execute));
-            _canExecute = canExecute ?? (_ => true);
+            _canExecute = canExecute ?? (() => true);
         }
 
-        public bool CanExecute(object parameter)
-        {
-            if (parameter == null && typeof(T).IsValueType)
-                return _canExecute(default);
-            return parameter is T t && _canExecute(t);
-        }
+        public bool CanExecute(object parameter) => _canExecute();
 
-        public void Execute(object parameter)
-        {
-            if (parameter == null && typeof(T).IsValueType)
-            {
-                _execute(default);
-                return;
-            }
-
-            if (parameter is T t)
-            {
-                _execute(t);
-            }
-        }
+        public void Execute(object parameter) => _execute();
 
         public event EventHandler CanExecuteChanged
         {
-            add { CommandManager.RequerySuggested += value; }
-            remove { CommandManager.RequerySuggested -= value; }
+            add => CommandManager.RequerySuggested += value;
+            remove => CommandManager.RequerySuggested -= value;
         }
 
-        // Вызывать этот метод, если состояние CanExecute меняется
-        public void RaiseCanExecuteChanged()
-        {
-            CommandManager.InvalidateRequerySuggested();
-        }
+        public void RaiseCanExecuteChanged() => CommandManager.InvalidateRequerySuggested();
     }
 }
+
