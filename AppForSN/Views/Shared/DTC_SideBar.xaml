@@ -4,7 +4,10 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:AppForSNForUsers.Views.Shared"
+             xmlns:vm="clr-namespace:AppForSNForUsers.ViewModels"
+             d:DataContext="{d:DesignInstance Type=vm:MainViewModel}"
              mc:Ignorable="d" >
+
     <Border Background="#292940" Padding="10">
         <StackPanel>
             <TextBlock Text="Меню"
@@ -15,6 +18,8 @@
 
             <Button Content="📁 Мои проекты"
                     Margin="0 5"
+                    Command="{Binding NavigateCommand}"
+                    CommandParameter="MyProjects"
                     HorizontalContentAlignment="Left"
                     Foreground="White"
                     Background="#383854"
@@ -23,6 +28,33 @@
                     FontSize="14"/>
 
             <Button Content="➕ Создать проект"
+                    Margin="0 5"
+                    HorizontalContentAlignment="Left"
+                    Foreground="White"
+                    Background="#383854"
+                    BorderBrush="Transparent"
+                    Padding="10,5"
+                    FontSize="14"/>
+
+            <Button Content="⚙️ Настройки"
+                    Margin="0 5"
+                    HorizontalContentAlignment="Left"
+                    Foreground="White"
+                    Background="#383854"
+                    BorderBrush="Transparent"
+                    Padding="10,5"
+                    FontSize="14"/>
+
+            <Button Content="⚙️ Настройки"
+                    Margin="0 5"
+                    HorizontalContentAlignment="Left"
+                    Foreground="White"
+                    Background="#383854"
+                    BorderBrush="Transparent"
+                    Padding="10,5"
+                    FontSize="14"/>
+
+            <Button Content="⚙️ Настройки"
                     Margin="0 5"
                     HorizontalContentAlignment="Left"
                     Foreground="White"

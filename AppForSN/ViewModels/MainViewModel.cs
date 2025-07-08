@@ -31,7 +31,7 @@ namespace AppForSNForUsers.ViewModels
             switch (viewName)
             {
                 case "Home":
-                    CurrentView = new HomePage(); 
+                    CurrentView = new HomePage(this); 
                     break;
 
                 case "Login":
@@ -39,6 +39,12 @@ namespace AppForSNForUsers.ViewModels
                     break;
                 case "Register":
                     CurrentView = new RegisterView(this,_authService);
+                    break;
+                case "MyProjects":
+                    CurrentView = new MyProjectsView();
+                    break;
+                case "UserHomePage":
+                    CurrentView = new UserWindowPage();
                     break;
             }
         }

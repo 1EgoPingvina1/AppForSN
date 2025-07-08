@@ -6,8 +6,10 @@
         xmlns:local="clr-namespace:AppForSNForUsers.Views.Dashboard"
         xmlns:shared="clr-namespace:AppForSNForUsers.Views.Shared"
         mc:Ignorable="d"
+        xmlns:vm="clr-namespace:AppForSNForUsers.ViewModels"
         MinWidth="600" MinHeight="400"
         d:DesignHeight="450" d:DesignWidth="800">
+    
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -18,8 +20,8 @@
             <ColumnDefinition Width="*"/>
 
         </Grid.ColumnDefinitions>
-        
-        <Frame Grid.Column="1" Grid.Row="1" NavigationUIVisibility="Hidden" Content="{Binding CurrentView}"/>
+
+        <ContentControl Grid.Column="1" Grid.Row="1" Content="{Binding CurrentView}" />
 
     </Grid>
 </Window>

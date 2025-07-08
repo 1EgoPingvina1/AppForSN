@@ -1,8 +1,7 @@
-﻿<Page x:Class="AppForSNForUsers.Views.Pages.HomePage"
+﻿<UserControl x:Class="AppForSNForUsers.Views.Pages.HomePage"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       Height="450" Width="800"
-      Title="Добро пожаловать!"
       Background="#FFF0F5FF"
       Loaded="Page_Loaded">
     <!-- Добавляем обработчик загрузки -->
@@ -77,4 +76,4 @@
             </StackPanel>
         </Viewbox>
     </Grid>
-</Page>
+</UserControl>

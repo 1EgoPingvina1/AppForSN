@@ -6,7 +6,7 @@ namespace AppForSNForUsers.Views.Pages
     /// <summary>
     /// Interaction logic for UserWindowPage.xaml
     /// </summary>
-    public partial class UserWindowPage : Page
+    public partial class UserWindowPage : UserControl
     {
         private readonly UserProjectsViewModel _viewModel = new UserProjectsViewModel();
 

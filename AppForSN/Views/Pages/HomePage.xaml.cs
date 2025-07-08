@@ -1,17 +1,19 @@
 ﻿using System.Windows;
 using System;
 using System.Windows.Controls;
+using AppForSNForUsers.ViewModels;
 
 namespace AppForSNForUsers.Views.Pages
 {
 
-    public partial class HomePage : Page
+    public partial class HomePage : UserControl
     {
-        public HomePage()
+        private readonly MainViewModel _mainViewModel;
+        public HomePage(MainViewModel mainViewModel)
         {
             InitializeComponent();
+            _mainViewModel = mainViewModel;
         }
-
         private void Page_Loaded(object sender, RoutedEventArgs e)
         {
             var timer = new System.Windows.Threading.DispatcherTimer();
@@ -19,7 +21,7 @@ namespace AppForSNForUsers.Views.Pages
             timer.Tick += (s, args) =>
             {
                 timer.Stop();
-                NavigationService?.Navigate(new UserWindowPage());
+                _mainViewModel.Navigate("UserHomePage");
             };
             timer.Start();
         }
