@@ -27,14 +27,6 @@ namespace DTC.Infrastructure.Data
         {
             base.OnModelCreating(builder);
 
-            builder.Entity<Role>().HasData(
-                new Role { Id = 1, Name = "Admin" },
-                new Role { Id = 2, Name = "User" },
-                new Role { Id = 3, Name = "Reviewer" },
-                new Role { Id = 4, Name = "Manager" },
-                new Role { Id = 5, Name = "Author" }
-            );
-
             builder.Entity<ProjectStatus>().HasData(
             new ProjectStatus { Id = 1, Name = "Registered" },
             new ProjectStatus { Id = 2, Name = "InReview" },
