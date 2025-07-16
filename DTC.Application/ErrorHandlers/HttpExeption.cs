@@ -4,7 +4,7 @@
     {
         public int StatusCode { get; private set; }
 
-        public HttpExeption(int statusCode, string message) : base($"{statusCode} - {message}")
+        public HttpExeption(int statusCode, string message) : base($"{message}")
         {
             StatusCode = statusCode;
         }

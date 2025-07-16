@@ -31,7 +31,11 @@ namespace AppForSNForUsers.ViewModels
         public string Username
         {
             get => _username;
-            set { _username = value; OnPropertyChanged(); }
+            set 
+            { 
+                _username = value; 
+                OnPropertyChanged();
+            }
         }
 
         public string Password { get; set; }

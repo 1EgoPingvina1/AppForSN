@@ -1,4 +1,5 @@
 using DTC.API.Helpers;
+using DTC.API.middleware;
 using DTC.Application.Interfaces;
 using DTC.Domain;
 using DTC.Domain.Entities.Identity;
@@ -6,6 +7,7 @@ using DTC.Domain.Services;
 using DTC.Infrastructure.Data;
 using DTC.Infrastructure.Repositories;
 using DTC.Infrastructure.Services;
+using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -34,6 +36,11 @@ namespace DTC.API
             builder.Services.AddScoped<IAuthService, AuthService>();
             builder.Services.AddScoped<ITokenService, TokenService>();
             builder.Services.AddScoped<IProjectRepository, ProjectRepository>();
+            builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
+            builder.Services.AddScoped<RoleService>();
+            builder.Services.AddScoped<IRoleRepository,RoleRepository>();
+
+
             builder.Services.AddDomainServices();
             builder.Services.AddSwaggerGen(options =>
             {
@@ -83,7 +90,7 @@ namespace DTC.API
 });
 
             var app = builder.Build();
-
+            app.UseMiddleware<ExceptionHandlingMiddleware>();
             // Configure the HTTP request pipeline.
 
             if (app.Environment.IsDevelopment())

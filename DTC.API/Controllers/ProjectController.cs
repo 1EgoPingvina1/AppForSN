@@ -16,16 +16,25 @@ namespace DTC.API.Controllers
         private readonly IProjectRepository _projectService;
         private readonly IWebHostEnvironment _env;
 
-        public ProjectController(IProjectRepository projectService, IWebHostEnvironment webHostEnvironment)
+        public ProjectController(IProjectRepository projectService, IWebHostEnvironment env)
         {
             _projectService = projectService;
-            _env = webHostEnvironment;
+            _env = env;
         }
+
+        private int? GetUserId()
+        {
+            var idClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            return int.TryParse(idClaim, out var id) ? id : null;
+        }
+
         [Authorize(Roles = "Author")]
         [HttpPost("create")]
         public async Task<IActionResult> Create([FromForm] CreateProjectDTO dto)
         {
-            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            var userId = GetUserId();
+            if (userId == null) return Unauthorized("Invalid user.");
+
             var photoPath = dto.Photo != null
                 ? await FileHandlers.SaveFileAsync(dto.Photo, "uploads/projects", _env.WebRootPath)
                 : null;
@@ -35,6 +44,7 @@ namespace DTC.API.Controllers
                 : null;
 
             var status = await _projectService.GetRegisterStatus();
+            if (status == null) return BadRequest("Unable to determine initial project status.");
 
             var project = new Project
             {
@@ -46,24 +56,75 @@ namespace DTC.API.Controllers
                 AuthorGroupId = dto.AuthorGroup_ID,
                 StatusId = status.Id,
                 CreatedAt = DateTime.UtcNow,
-                CreaterId = userId,
+                CreaterId = userId.Value,
                 PhotoUrl = photoPath,
                 ProjectFiles = archivePath
             };
 
-            var result = await _projectService.CreateProjectAsync(project);
-            return Ok(result);
+            var created = await _projectService.CreateProjectAsync(project);
+            return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
         }
 
         [Authorize]
         [HttpGet("my-projects")]
         public async Task<IActionResult> GetMyProjects()
         {
-            if (!User.Identity.IsAuthenticated)
-                return Unauthorized("User is not authenticated");
-            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
-            var projects = await _projectService.GetProjectsByUserAsync(userId);
+            var userId = GetUserId();
+            if (userId == null) return Unauthorized("Invalid user.");
+
+            var projects = await _projectService.GetProjectsByUserAsync(userId.Value);
             return Ok(projects);
+        }
+
+        [Authorize]
+        [HttpGet("{id:int}")]
+        public async Task<IActionResult> GetById(int id)
+        {
+            var userId = GetUserId();
+            if (userId == null) return Unauthorized();
+
+            var project = await _projectService.GetByIdAsync(id);
+            if (project == null || project.CreaterId != userId)
+                return NotFound();
+
+            return Ok(project);
+        }
+
+        [Authorize(Roles = "Author")]
+        [HttpPut("{id:int}")]
+        public async Task<IActionResult> Update(int id, [FromBody] UpdateProjectDTO dto)
+        {
+            var userId = GetUserId();
+            if (userId == null) return Unauthorized();
+
+            var project = await _projectService.GetByIdAsync(id);
+            if (project == null || project.CreaterId != userId)
+                return NotFound("Project not found or unauthorized");
+
+            project.Name = dto.Name;
+            project.Description = dto.Description;
+            project.Version = dto.Version;
+            project.VersionDate = DateTime.UtcNow;
+            project.ProjectTypeId = dto.ProjectTypeId;
+            project.AuthorGroupId = dto.AuthorGroupId;
+
+            await _projectService.UpdateProjectAsync(project);
+            return NoContent();
+        }
+
+        [Authorize(Roles = "Author")]
+        [HttpDelete("{id:int}")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var userId = GetUserId();
+            if (userId == null) return Unauthorized();
+
+            var project = await _projectService.GetByIdAsync(id);
+            if (project == null || project.CreaterId != userId)
+                return NotFound();
+
+            await _projectService.DeleteProjectAsync(id);
+            return NoContent();
         }
     }
 }
