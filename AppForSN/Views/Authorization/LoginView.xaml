@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:AppForSNForUsers.Views.Authorization" xmlns:viewmodels="clr-namespace:AppForSNForUsers.ViewModels" d:DataContext="{d:DesignInstance Type=viewmodels:LoginViewModel}"
+        xmlns:local="clr-namespace:AppForSNForUsers.Views.Authorization" xmlns:viewmodels="clr-namespace:AppForSNForUsers.ViewModels"
              mc:Ignorable="d" Background="{StaticResource SteamWhiteBrush}">
 
     <Grid Width="300" VerticalAlignment="Center" HorizontalAlignment="Center">

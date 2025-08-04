@@ -135,6 +135,9 @@
     <Compile Include="Views\Pages\MyProjectsView.xaml.cs">
       <DependentUpon>MyProjectsView.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\Pages\PasswordResetView.xaml.cs">
+      <DependentUpon>PasswordResetView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\Pages\UserWindowPage.xaml.cs">
       <DependentUpon>UserWindowPage.xaml</DependentUpon>
     </Compile>
@@ -143,6 +146,9 @@
     </Compile>
     <Compile Include="Views\Shared\HeaderView.xaml.cs">
       <DependentUpon>HeaderView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Shared\NotificationControl.xaml.cs">
+      <DependentUpon>NotificationControl.xaml</DependentUpon>
     </Compile>
     <Page Include="Assets\Styles\Brushes.xaml">
       <SubType>Designer</SubType>
@@ -195,6 +201,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Views\Pages\PasswordResetView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Views\Pages\UserWindowPage.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -204,6 +214,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\Shared\HeaderView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Shared\NotificationControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

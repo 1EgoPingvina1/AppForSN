@@ -6,8 +6,7 @@
       xmlns:local="clr-namespace:AppForSNForUsers.Views.Pages"
       xmlns:vm="clr-namespace:AppForSNForUsers.ViewModels"
       mc:Ignorable="d" 
-      d:DesignHeight="450" d:DesignWidth="800"
-      d:DataContext="{d:DesignInstance Type=vm:MyProjectsViewModel}">
+      d:DesignHeight="450" d:DesignWidth="800">
 
     <Grid Background="#1D1D30">
         <StackPanel Margin="20">
@@ -41,4 +40,5 @@
                        Visibility="{Binding NoProjectsVisibility}" />
         </StackPanel>
     </Grid>
+    
 </UserControl>

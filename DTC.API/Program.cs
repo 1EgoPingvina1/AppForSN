@@ -3,11 +3,9 @@ using DTC.API.middleware;
 using DTC.Application.Interfaces;
 using DTC.Domain;
 using DTC.Domain.Entities.Identity;
-using DTC.Domain.Services;
+using DTC.Infrastructure.Services;
 using DTC.Infrastructure.Data;
 using DTC.Infrastructure.Repositories;
-using DTC.Infrastructure.Services;
-using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -39,7 +37,7 @@ namespace DTC.API
             builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
             builder.Services.AddScoped<RoleService>();
             builder.Services.AddScoped<IRoleRepository,RoleRepository>();
-
+            builder.Services.AddScoped<IEmailService, SmtpEmailService>();
 
             builder.Services.AddDomainServices();
             builder.Services.AddSwaggerGen(options =>

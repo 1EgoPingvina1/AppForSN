@@ -9,7 +9,6 @@
         xmlns:vm="clr-namespace:AppForSNForUsers.ViewModels"
         MinWidth="600" MinHeight="400"
         d:DesignHeight="450" d:DesignWidth="800">
-    
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>

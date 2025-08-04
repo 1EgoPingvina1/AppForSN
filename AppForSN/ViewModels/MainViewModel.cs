@@ -73,7 +73,7 @@ namespace AppForSNForUsers.ViewModels
                     CurrentView = new MyProjectsView();
                     break;
                 case "UserHomePage":
-                    CurrentView = new UserWindowPage();
+                    
                     break;
             }
         }
