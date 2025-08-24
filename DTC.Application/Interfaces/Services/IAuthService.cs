@@ -1,8 +1,7 @@
-﻿
-using DTC.Application.DTO;
+﻿using DTC.Application.DTO.Account;
 using DTC.Domain.Entities.Identity;
 
-namespace DTC.Application.Interfaces
+namespace DTC.Application.Interfaces.Services
 {
     public interface IAuthService
     {

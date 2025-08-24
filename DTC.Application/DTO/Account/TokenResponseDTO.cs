@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DTC.Application.DTO
+namespace DTC.Application.DTO.Account
 {
     public class TokenResponseDTO
     {

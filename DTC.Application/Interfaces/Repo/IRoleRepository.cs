@@ -1,6 +1,6 @@
 ﻿using DTC.Domain.Entities.Identity;
 
-namespace DTC.Application.Interfaces
+namespace DTC.Application.Interfaces.Repo
 {
     public interface IRoleRepository
     {

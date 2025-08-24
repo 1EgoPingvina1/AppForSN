@@ -1,5 +1,5 @@
-﻿using DTC.Application.DTO;
-using DTC.Application.Interfaces;
+﻿using DTC.Application.DTO.Account;
+using DTC.Application.Interfaces.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DTC.API.Controllers
@@ -21,8 +21,7 @@ namespace DTC.API.Controllers
 
 
         [HttpPost("refresh-token")]
-        public async Task<ActionResult<TokenResponseDTO>> RefreshToken(RefreshTokenDTO dto) =>
-            Ok(await _authService.RefreshTokenAsync(dto));
+        public async Task<ActionResult<TokenResponseDTO>> RefreshToken(RefreshTokenDTO dto) => Ok(await _authService.RefreshTokenAsync(dto));
 
         [HttpPost("logout")]
         public async Task<IActionResult> Logout([FromBody] LogoutDTO dto)
@@ -35,7 +34,7 @@ namespace DTC.API.Controllers
         public async Task<IActionResult> RequestPasswordReset([FromBody] PasswordResetRequestDTO dto)
         {
             await _authService.RequestPasswordResetAsync(dto.Email);
-            return Ok(new { message = "Password reset instructions sent to email." });
+            return Ok(new { message = "If an account with that email exists, we have sent password reset instructions." });
         }
 
         [HttpPost("reset-password")]

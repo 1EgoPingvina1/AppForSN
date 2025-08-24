@@ -1,6 +1,7 @@
 ﻿using DTC.API.Helpers;
-using DTC.Application.DTO;
-using DTC.Application.Interfaces;
+using DTC.Application.DTO.Project;
+using DTC.Application.Interfaces.Repo;
+using DTC.Application.Interfaces.Services;
 using DTC.Domain.Entities.Main;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -13,118 +14,66 @@ namespace DTC.API.Controllers
     [Route("api/[controller]")]
     public class ProjectController : ControllerBase
     {
-        private readonly IProjectRepository _projectService;
+        private readonly IProjectService _projectService;
         private readonly IWebHostEnvironment _env;
 
-        public ProjectController(IProjectRepository projectService, IWebHostEnvironment env)
+        public ProjectController(IProjectService projectService, IWebHostEnvironment env)
         {
             _projectService = projectService;
             _env = env;
         }
 
-        private int? GetUserId()
+        [HttpPost]
+        [Authorize(Roles = "Author")]
+        [ProducesResponseType(typeof(ProjectResponseDto), StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> Create([FromForm] CreateProjectDTO createDto)
         {
-            var idClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            return int.TryParse(idClaim, out var id) ? id : null;
+            var createdProject = await _projectService.CreateAsync(createDto);
+            return Ok(createdProject);
         }
 
+        [HttpPut("{id}")]
         [Authorize(Roles = "Author")]
-        [HttpPost("create")]
-        public async Task<IActionResult> Create([FromForm] CreateProjectDTO dto)
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> Update(int id, [FromBody] UpdateProjectDTO updateDto)
         {
-            var userId = GetUserId();
-            if (userId == null) return Unauthorized("Invalid user.");
-
-            var photoPath = dto.Photo != null
-                ? await FileHandlers.SaveFileAsync(dto.Photo, "uploads/projects", _env.WebRootPath)
-                : null;
-
-            var archivePath = dto.ProjectFiles != null
-                ? await FileHandlers.SaveFileAsync(dto.ProjectFiles, "uploads/archives", _env.WebRootPath)
-                : null;
-
-            var status = await _projectService.GetRegisterStatus();
-            if (status == null) return BadRequest("Unable to determine initial project status.");
-
-            var project = new Project
+            try
             {
-                Name = dto.Name,
-                Version = dto.Version,
-                VersionDate = DateTime.UtcNow,
-                Description = dto.Description,
-                ProjectTypeId = dto.ProjectType_ID,
-                AuthorGroupId = dto.AuthorGroup_ID,
-                StatusId = status.Id,
-                CreatedAt = DateTime.UtcNow,
-                CreaterId = userId.Value,
-                PhotoUrl = photoPath,
-                ProjectFiles = archivePath
-            };
-
-            var created = await _projectService.CreateProjectAsync(project);
-            return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
+                await _projectService.UpdateAsync(id, updateDto);
+                return NoContent();
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
         }
 
-        [Authorize]
-        [HttpGet("my-projects")]
-        public async Task<IActionResult> GetMyProjects()
-        {
-            var userId = GetUserId();
-            if (userId == null) return Unauthorized("Invalid user.");
 
-            var projects = await _projectService.GetProjectsByUserAsync(userId.Value);
-            return Ok(projects);
-        }
-
-        [Authorize]
-        [HttpGet("{id:int}")]
-        public async Task<IActionResult> GetById(int id)
-        {
-            var userId = GetUserId();
-            if (userId == null) return Unauthorized();
-
-            var project = await _projectService.GetByIdAsync(id);
-            if (project == null || project.CreaterId != userId)
-                return NotFound();
-
-            return Ok(project);
-        }
-
+        [HttpPost("{id}/review")]
         [Authorize(Roles = "Author")]
-        [HttpPut("{id:int}")]
-        public async Task<IActionResult> Update(int id, [FromBody] UpdateProjectDTO dto)
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> SubmitForReview(int id)
         {
-            var userId = GetUserId();
-            if (userId == null) return Unauthorized();
-
-            var project = await _projectService.GetByIdAsync(id);
-            if (project == null || project.CreaterId != userId)
-                return NotFound("Project not found or unauthorized");
-
-            project.Name = dto.Name;
-            project.Description = dto.Description;
-            project.Version = dto.Version;
-            project.VersionDate = DateTime.UtcNow;
-            project.ProjectTypeId = dto.ProjectTypeId;
-            project.AuthorGroupId = dto.AuthorGroupId;
-
-            await _projectService.UpdateProjectAsync(project);
-            return NoContent();
-        }
-
-        [Authorize(Roles = "Author")]
-        [HttpDelete("{id:int}")]
-        public async Task<IActionResult> Delete(int id)
-        {
-            var userId = GetUserId();
-            if (userId == null) return Unauthorized();
-
-            var project = await _projectService.GetByIdAsync(id);
-            if (project == null || project.CreaterId != userId)
-                return NotFound();
-
-            await _projectService.DeleteProjectAsync(id);
-            return NoContent();
+            try
+            {
+                await _projectService.SubmitForReviewAsync(id);
+                return NoContent(); // Успешно, тело ответа не требуется
+            }
+            catch (KeyNotFoundException ex)
+            {
+                // Проект не найден
+                return NotFound(ex.Message);
+            }
+            catch (InvalidOperationException ex)
+            {
+                // Проект не в том статусе для отправки на ревью (бизнес-правило)
+                return BadRequest(ex.Message);
+            }
         }
     }
 }

@@ -7,20 +7,24 @@ namespace DTC.Infrastructure.Data
 {
     public class ApplicationDataBaseContext : IdentityDbContext<User, Role, int>
     {
+        //Authorization domain
         public DbSet<RefreshToken> RefreshTokens { get; set; }
 
-        public DbSet<ProjectType > ProjectTypes { get; set; }
+        /// <summary>
+        /// Project / Authors Domain (main)
+        /// </summary>
+        public DbSet<Project> Projects { get; set; }
+        public DbSet<ProjectType> ProjectTypes { get; set; }
         public DbSet<ProjectFile> ProjectFiles { get; set; }
         public DbSet<ProjectStatus> Statuses { get; set; }
 
+        public DbSet<Author> Authors { get; set; }
         public DbSet<AuthorGroup> AuthorGroups { get; set; }
         public DbSet<AuthorGroupMember> AuthorGroupsMember { get; set; }
 
-        public DbSet<Project> Projects { get; set; }
-
         public ApplicationDataBaseContext(DbContextOptions<ApplicationDataBaseContext> options)
             : base(options) { }
-
+        
         public ApplicationDataBaseContext() { }
 
         protected override void OnModelCreating(ModelBuilder builder)
@@ -51,6 +55,19 @@ namespace DTC.Infrastructure.Data
                 entity.HasOne(rt => rt.User)
                     .WithMany(u => u.RefreshTokens)
                     .HasForeignKey(rt => rt.UserId);
+            });
+
+            builder.Entity<AuthorGroupMember>(entity =>
+            {
+                entity.HasKey(agm => new { agm.Author_ID, agm.AuthorGroup_ID });
+
+                entity.HasOne(agm => agm.Author)
+                    .WithMany(a => a.GroupMemberships)
+                    .HasForeignKey(agm => agm.Author_ID);
+
+                entity.HasOne(agm => agm.AuthorGroup)
+                    .WithMany(g => g.Members)
+                    .HasForeignKey(agm => agm.AuthorGroup_ID);
             });
         }
     }

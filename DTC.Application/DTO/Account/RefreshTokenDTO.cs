@@ -1,4 +1,4 @@
-﻿namespace DTC.Application.DTO
+﻿namespace DTC.Application.DTO.Account
 {
     public class RefreshTokenDTO
     {

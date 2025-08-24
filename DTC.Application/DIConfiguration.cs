@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using DTC.Application.Interfaces.Services;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace DTC.Application
 {

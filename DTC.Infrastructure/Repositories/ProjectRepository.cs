@@ -1,5 +1,5 @@
 ﻿using DTC.Application.DTO;
-using DTC.Application.Interfaces;
+using DTC.Application.Interfaces.Repo;
 using DTC.Domain.Entities.Main;
 using DTC.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
@@ -8,46 +8,27 @@ namespace DTC.Infrastructure.Repositories
 {
     public class ProjectRepository : IProjectRepository
     {
-        private readonly IGenericRepository<Project> _genericRepository;
         private readonly ApplicationDataBaseContext _context;
 
-        public ProjectRepository(ApplicationDataBaseContext context, IGenericRepository<Project> genericRepository)
+        public ProjectRepository(ApplicationDataBaseContext context)
         {
             _context = context;
-            _genericRepository = genericRepository;
         }
 
-        public async Task<Project> CreateProjectAsync(Project project)
+        public async Task<Project?> GetByIdAsync(int id)
         {
-            await _genericRepository.AddAsync(project);
-            await _genericRepository.SaveAsync();
-            return project;
+            return await _context.Projects.FindAsync(id);
         }
 
-        public async Task<bool> DeleteProjectAsync(int projectId)
+        public void Add(Project project)
         {
-            await _genericRepository.DeleteAsync(projectId);
-            await _genericRepository.SaveAsync();
-            return true;
+            _context.Projects.Add(project);
         }
 
-        public async Task<Project?> GetByIdAsync(int projectId)
+        public void Update(Project project)
         {
-            return await _genericRepository.GetByIdAsync(projectId);
+            _context.Projects.Update(project);
         }
 
-        public async Task<IEnumerable<Project>> GetProjectsByUserAsync(int userId)
-        {
-            return await _context.Projects.Where(p => p.CreaterId == userId).ToListAsync();
-        }
-
-        public async Task<ProjectStatus?> GetRegisterStatus() => await _context.Statuses.FirstOrDefaultAsync(s => s.Name == "Installed");
-
-        public async Task<Project> UpdateProjectAsync(Project project)
-        {
-            _genericRepository.Update(project);
-            await _genericRepository.SaveAsync();
-            return project;
-        }
     }
 }

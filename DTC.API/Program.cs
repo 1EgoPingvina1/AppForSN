@@ -1,6 +1,5 @@
 using DTC.API.Helpers;
 using DTC.API.middleware;
-using DTC.Application.Interfaces;
 using DTC.Domain;
 using DTC.Domain.Entities.Identity;
 using DTC.Infrastructure.Services;
@@ -11,6 +10,14 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
+using Microsoft.Extensions.Options;
+using RabbitMQ.Client;
+using Microsoft.EntityFrameworkCore.Metadata;
+using DTC.Application.Interfaces.Services;
+using DTC.Application.Interfaces.Repo;
+using DTC.Application.Interfaces;
+using System.Reflection;
+using DTC.Application.AutoMapper.Mappings;
 
 namespace DTC.API
 {
@@ -34,10 +41,16 @@ namespace DTC.API
             builder.Services.AddScoped<IAuthService, AuthService>();
             builder.Services.AddScoped<ITokenService, TokenService>();
             builder.Services.AddScoped<IProjectRepository, ProjectRepository>();
-            builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
             builder.Services.AddScoped<RoleService>();
             builder.Services.AddScoped<IRoleRepository,RoleRepository>();
             builder.Services.AddScoped<IEmailService, SmtpEmailService>();
+            builder.Services.AddScoped<IAuthorGroupService, AuthorGroupService>();
+            builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+
+            builder.Services.AddAutoMapper(config =>
+            {
+                config.AddProfile<MappingProfile>();
+            });
 
             builder.Services.AddDomainServices();
             builder.Services.AddSwaggerGen(options =>
@@ -119,7 +132,6 @@ namespace DTC.API
                     throw;
                 }
             }
-
 
             app.MapControllers();
             app.Run();

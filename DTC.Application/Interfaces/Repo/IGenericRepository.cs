@@ -1,4 +1,4 @@
-﻿namespace DTC.Application.Interfaces
+﻿namespace DTC.Application.Interfaces.Repo
 {
     public interface IGenericRepository<T> where T : class
     {

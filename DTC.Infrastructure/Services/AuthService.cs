@@ -1,6 +1,6 @@
-﻿using DTC.Application.DTO;
+﻿using DTC.Application.DTO.Account;
 using DTC.Application.ErrorHandlers;
-using DTC.Application.Interfaces;
+using DTC.Application.Interfaces.Services;
 using DTC.Domain.Entities.Identity;
 using DTC.Infrastructure.Data;
 using DTC.Infrastructure.Repositories;

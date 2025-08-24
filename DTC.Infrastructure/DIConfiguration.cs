@@ -1,7 +1,8 @@
-﻿using DTC.Domain.Entities.Identity;
+﻿using DTC.Application.AutoMapper.Mappings;
+using DTC.Application.Interfaces;
+using DTC.Domain.Entities.Identity;
 using DTC.Infrastructure.Data;
 using DTC.Infrastructure.Repositories;
-using DTC.Infrastructure.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -21,6 +22,10 @@ namespace DTC.Infrastructure
                 options.Password.RequiredLength = 8;
             }).AddEntityFrameworkStores<ApplicationDataBaseContext>()
             .AddDefaultTokenProviders();
+
+            services.AddAutoMapper(typeof(MappingProfile));
+
+            services.AddScoped<IUnitOfWork, UnitOfWork>();
 
             return services;
         }

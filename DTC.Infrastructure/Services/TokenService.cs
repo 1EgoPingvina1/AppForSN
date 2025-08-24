@@ -1,4 +1,4 @@
-﻿using DTC.Application.Interfaces;
+﻿using DTC.Application.Interfaces.Services;
 using DTC.Domain.Entities.Identity;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
