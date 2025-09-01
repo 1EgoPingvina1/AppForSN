@@ -10,17 +10,15 @@ namespace DTC.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    [Authorize] // Только для авторизованных пользователей
+    [Authorize]
     public class AuthorGroupsController : ControllerBase
     {
-        // Здесь будет инжектироваться IAuthorGroupService, который работает с UnitOfWork
         private readonly IAuthorGroupService _authorGroupService;
 
         public AuthorGroupsController(IAuthorGroupService authorGroupService)
         {
             _authorGroupService = authorGroupService;
         }
-
 
         [HttpGet("{id}")]
         [ProducesResponseType(typeof(AuthorGroupResponseDto), StatusCodes.Status200OK)]
@@ -42,13 +40,9 @@ namespace DTC.API.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> CreateGroup([FromBody] CreateAuthorGroupDto createDto)
         {
-            // Получаем ID текущего пользователя из JWT токена.
-            // Примечание: Ваш сервис использует int для ID. Убедитесь, что ClaimTypes.NameIdentifier тоже хранится в виде int.
             var creatorIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (!int.TryParse(creatorIdString, out var creatorId))
-            {
                 return BadRequest("Invalid user ID in token.");
-            }
             await _authorGroupService.CreateGroupAsync(createDto, creatorId);
             return Ok();
         }
@@ -65,27 +59,21 @@ namespace DTC.API.Controllers
             {
                 return BadRequest("Invalid user ID in token.");
             }
-
             try
             {
                 await _authorGroupService.AddMemberAsync(groupId, addDto.UserId, currentUserId);
-
-                // 204 NoContent - стандартный ответ на успешное действие, не возвращающее контент.
                 return NoContent();
             }
             catch (KeyNotFoundException ex)
             {
-                // Сервис бросил исключение, что группа не найдена -> 404 Not Found
                 return NotFound(ex.Message);
             }
             catch (SecurityException ex)
             {
-                // Сервис бросил исключение безопасности (нет прав) -> 403 Forbidden
                 return Forbid(ex.Message);
             }
             catch (InvalidOperationException ex)
             {
-                // Сервис бросил исключение о нарушении бизнес-логики -> 400 Bad Request
                 return BadRequest(ex.Message);
             }
         }

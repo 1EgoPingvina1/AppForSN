@@ -7,7 +7,7 @@ namespace DTC.Application.Interfaces.Repo
         void Add(Project project);
         Task<Project?> GetByIdAsync(int projectId);
         void Update(Project project);
-        //Task<bool> DeleteProjectAsync(int projectId);
+        void DeleteByIdAsync(Project project);
     }
 
 }

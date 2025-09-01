@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace DTC.Application.DTO.Account
+﻿namespace DTC.Application.DTO.Account
 {
     public class TokenResponseDTO
     {

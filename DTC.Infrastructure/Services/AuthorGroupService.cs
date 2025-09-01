@@ -57,9 +57,6 @@ namespace DTC.Infrastructure.Services
                 throw new KeyNotFoundException($"Group with ID {groupId} not found.");
             }
 
-            // БИЗНЕС-ЛОГИКА: Проверяем права.
-            // Только участник группы может добавлять новых участников.
-            // (В будущем можно добавить роли "администратор группы" и т.д.)
             bool isCurrentUserMember = group.Members.Any(m => m.Author.UserId == currentUserId);
             if (!isCurrentUserMember)
             {

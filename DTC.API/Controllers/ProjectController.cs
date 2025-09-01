@@ -1,12 +1,7 @@
-﻿using DTC.API.Helpers;
-using DTC.Application.DTO.Project;
-using DTC.Application.Interfaces.Repo;
+﻿using DTC.Application.DTO.Project;
 using DTC.Application.Interfaces.Services;
-using DTC.Domain.Entities.Main;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using System.Security.Claims;
 
 namespace DTC.API.Controllers
 {
@@ -15,12 +10,22 @@ namespace DTC.API.Controllers
     public class ProjectController : ControllerBase
     {
         private readonly IProjectService _projectService;
-        private readonly IWebHostEnvironment _env;
 
-        public ProjectController(IProjectService projectService, IWebHostEnvironment env)
+        public ProjectController(IProjectService projectService)
         {
             _projectService = projectService;
-            _env = env;
+        }
+
+        [HttpGet("{id}")]
+        [Authorize]
+        public async Task<IActionResult> GetById(int id)
+        {
+            var project = await _projectService.GetByIdAsync(id);
+            if (project == null)
+            {
+                return NotFound();
+            }
+            return Ok(project);
         }
 
         [HttpPost]
@@ -51,6 +56,13 @@ namespace DTC.API.Controllers
             }
         }
 
+        [HttpDelete("{id}")]
+        [Authorize(Roles = "Author")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            await _projectService.DeleteAsync(id);
+            return NoContent();
+        }
 
         [HttpPost("{id}/review")]
         [Authorize(Roles = "Author")]
@@ -62,16 +74,14 @@ namespace DTC.API.Controllers
             try
             {
                 await _projectService.SubmitForReviewAsync(id);
-                return NoContent(); // Успешно, тело ответа не требуется
+                return NoContent();
             }
             catch (KeyNotFoundException ex)
             {
-                // Проект не найден
                 return NotFound(ex.Message);
             }
             catch (InvalidOperationException ex)
             {
-                // Проект не в том статусе для отправки на ревью (бизнес-правило)
                 return BadRequest(ex.Message);
             }
         }

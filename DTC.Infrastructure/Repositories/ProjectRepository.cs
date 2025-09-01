@@ -30,5 +30,9 @@ namespace DTC.Infrastructure.Repositories
             _context.Projects.Update(project);
         }
 
+        public void DeleteByIdAsync(Project project)
+        {
+            _context.Projects.Remove(project);
+        }
     }
 }

@@ -8,5 +8,6 @@ namespace DTC.Application.Interfaces.Services
         Task<ProjectResponseDto?> GetByIdAsync(int id);
         Task UpdateAsync(int id, UpdateProjectDTO updateDto);
         Task SubmitForReviewAsync(int id);
+        Task DeleteAsync(int id);
     }
 }

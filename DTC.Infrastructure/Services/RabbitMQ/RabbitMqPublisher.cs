@@ -32,24 +32,38 @@ namespace DTC.Infrastructure.Services.RabbitMQ
         public void Dispose()
         {
             _channel?.Dispose();
-            _connection?.Close();
-            _channel?.Dispose();
             _connection?.Dispose();
         }
 
         public void Publish<T>(T message, string routing)
         {
-            var messageJson = JsonConvert.SerializeObject(message);
-            var body = Encoding.UTF8.GetBytes(messageJson);
+            try
+            {
+                // Объявляем очередь при каждой публикации (идемпотентно)
+                _channel.QueueDeclare(
+                    queue: routing,
+                    durable: true,
+                    exclusive: false,
+                    autoDelete: false,
+                    arguments: null);
 
-            var properties = _channel.CreateBasicProperties();
-            properties.Persistent = true; 
+                var messageJson = JsonConvert.SerializeObject(message);
+                var body = Encoding.UTF8.GetBytes(messageJson);
 
-            _channel.BasicPublish(
-                exchange: "",
-                routingKey: routing,
-                basicProperties: properties,
-                body: body);
+                var properties = _channel.CreateBasicProperties();
+                properties.Persistent = true;
+
+                _channel.BasicPublish(
+                    exchange: "",
+                    routingKey: routing,
+                    basicProperties: properties,
+                    body: body);
+            }
+            catch (Exception ex)
+            {
+                // Обработка ошибки
+                throw new InvalidOperationException($"Failed to publish message to {routing}", ex);
+            }
         }
     }
 }

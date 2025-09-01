@@ -10,14 +10,14 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
-using Microsoft.Extensions.Options;
-using RabbitMQ.Client;
-using Microsoft.EntityFrameworkCore.Metadata;
 using DTC.Application.Interfaces.Services;
 using DTC.Application.Interfaces.Repo;
 using DTC.Application.Interfaces;
-using System.Reflection;
 using DTC.Application.AutoMapper.Mappings;
+using DTC.API.Middleware;
+using Serilog;
+using DTC.Application.Interfaces.RabbitMQ;
+using DTC.Infrastructure.Services.RabbitMQ;
 
 namespace DTC.API
 {
@@ -41,17 +41,18 @@ namespace DTC.API
             builder.Services.AddScoped<IAuthService, AuthService>();
             builder.Services.AddScoped<ITokenService, TokenService>();
             builder.Services.AddScoped<IProjectRepository, ProjectRepository>();
+            builder.Services.AddScoped<IProjectService, ProjectService>();
             builder.Services.AddScoped<RoleService>();
-            builder.Services.AddScoped<IRoleRepository,RoleRepository>();
+            builder.Services.AddScoped<IRoleRepository, RoleRepository>();
             builder.Services.AddScoped<IEmailService, SmtpEmailService>();
             builder.Services.AddScoped<IAuthorGroupService, AuthorGroupService>();
             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
-
+            builder.Services.AddScoped<IRabbitMqPublisher, RabbitMqPublisher>();
+            builder.Services.Configure<RabbitMqOptions>(builder.Configuration.GetSection("RabbitMq"));
             builder.Services.AddAutoMapper(config =>
             {
                 config.AddProfile<MappingProfile>();
             });
-
             builder.Services.AddDomainServices();
             builder.Services.AddSwaggerGen(options =>
             {
@@ -84,25 +85,31 @@ namespace DTC.API
             {
                 options.DefaultAuthenticateScheme = "Bearer";
                 options.DefaultChallengeScheme = "Bearer";
-            })
-.AddJwtBearer("Bearer", options =>
-{
-    options.TokenValidationParameters = new TokenValidationParameters
-    {
-        ValidateIssuer = true,
-        ValidateAudience = true,
-        ValidateLifetime = true,
-        ValidateIssuerSigningKey = true,
-        ValidIssuer = builder.Configuration["JwtSettings:Issuer"],
-        ValidAudience = builder.Configuration["JwtSettings:Audience"],
-        IssuerSigningKey = new SymmetricSecurityKey(
+            }).AddJwtBearer("Bearer", options =>
+            {
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
+                    ValidIssuer = builder.Configuration["JwtSettings:Issuer"],
+                    ValidAudience = builder.Configuration["JwtSettings:Audience"],
+                    IssuerSigningKey = new SymmetricSecurityKey(
             Encoding.UTF8.GetBytes(builder.Configuration["JwtSettings:Secret"]))
-    };
-});
+                };
+            });
 
+            Log.Logger = new LoggerConfiguration()
+                .MinimumLevel.Information()
+                .WriteTo.Console()
+                .CreateLogger();
+
+
+            builder.Host.UseSerilog();
             var app = builder.Build();
             app.UseMiddleware<ExceptionHandlingMiddleware>();
-            // Configure the HTTP request pipeline.
+            app.UseMiddleware<TransactionMiddleware>();
 
             if (app.Environment.IsDevelopment())
             {
@@ -121,20 +128,21 @@ namespace DTC.API
             using (var scope = app.Services.CreateScope())
             {
                 var services = scope.ServiceProvider;
-
                 try
                 {
                     await SeedData.InitializeAsync(services);
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"Ошибка при миграции или сидинге: {ex.Message}");
-                    throw;
+                    var logger = services.GetRequiredService<ILogger<Program>>();
+                    logger.LogError(ex, "Произошла ошибка при инициализации базы данных.");
                 }
             }
 
             app.MapControllers();
             app.Run();
+
+            Log.CloseAndFlush();
         }
     }
 }

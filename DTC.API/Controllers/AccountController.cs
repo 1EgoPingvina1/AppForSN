@@ -19,7 +19,6 @@ namespace DTC.API.Controllers
         [HttpPost("register")]
         public async Task<ActionResult<UserDTO>> Register(RegisterDTO register) => Ok(await _authService.RegisterAsync(register));
 
-
         [HttpPost("refresh-token")]
         public async Task<ActionResult<TokenResponseDTO>> RefreshToken(RefreshTokenDTO dto) => Ok(await _authService.RefreshTokenAsync(dto));
 

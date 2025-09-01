@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace DTC.Application.DTO.Project
+﻿namespace DTC.Application.DTO.Project
 {
     public class ProjectResponseDto
     {
@@ -14,6 +8,6 @@ namespace DTC.Application.DTO.Project
         public DateTime VersionDate { get; set; }
         public string Description { get; set; }
         public string Status { get; set; }
-        public Guid AuthorGroupId { get; set; }
+        public int AuthorGroupId { get; set; }
     }
 }

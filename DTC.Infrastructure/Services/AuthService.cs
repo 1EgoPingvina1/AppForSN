@@ -47,18 +47,16 @@ namespace DTC.Infrastructure.Services
             };
 
             var result = await _userManager.CreateAsync(user, registerDTO.Password);
-
-            await _userManager.AddToRoleAsync(user, "User");
-            if (!result.Succeeded)
-                throw new HttpExeption(422, "Looks like the attempted has failed. Please check your data and try again.");
-
-            var refreshToken = await GenerateRefreshToken(user);
+            if (!result.Succeeded) throw new HttpExeption(422, "Не удалось создать пользователя!");
+            var roleResult = await _userManager.AddToRoleAsync(user, "User");
+            if (!roleResult.Succeeded)
+                throw new HttpExeption(422, "Ошибка при назначении роли пользователю");
 
             return new UserDTO
             {
                 Username = user.UserName,
                 Token = await _tokenService.GenerateJwtToken(user),
-                RefreshToken = refreshToken.Token
+                RefreshToken = (await GenerateRefreshToken(user)).Token
             };
         }
 
@@ -75,7 +73,6 @@ namespace DTC.Infrastructure.Services
             var newRefreshToken = await GenerateRefreshToken(token.User);
 
             _context.RefreshTokens.Remove(token);
-            await _context.SaveChangesAsync();
 
             return new TokenResponseDTO
             {
@@ -110,7 +107,6 @@ namespace DTC.Infrastructure.Services
             if (token != null)
             {
                 _context.RefreshTokens.Remove(token);
-                await _context.SaveChangesAsync();
             }
         }
 
@@ -159,8 +155,6 @@ namespace DTC.Infrastructure.Services
             };
 
             await _context.RefreshTokens.AddAsync(refreshToken);
-            await _context.SaveChangesAsync();
-
             return refreshToken;
         }
     }
