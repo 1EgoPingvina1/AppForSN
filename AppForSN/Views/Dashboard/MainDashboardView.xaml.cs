@@ -14,10 +14,6 @@ namespace AppForSNForUsers.Views.Dashboard
         public MainDashboardView()
         {
             InitializeComponent();
-            var httpClient = new HttpClient();
-            var authService = new AuthService(httpClient);
-            DataContext = new MainViewModel(authService);
-
         }
     }
 }

@@ -22,6 +22,21 @@ namespace DTC.Infrastructure.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("DTC.Domain.Entities.Identity.AppUserRole", b =>
+                {
+                    b.Property<int>("UserId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("RoleId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("UserId", "RoleId");
+
+                    b.HasIndex("RoleId");
+
+                    b.ToTable("AspNetUserRoles", (string)null);
+                });
+
             modelBuilder.Entity("DTC.Domain.Entities.Identity.RefreshToken", b =>
                 {
                     b.Property<int>("Id")
@@ -253,7 +268,7 @@ namespace DTC.Infrastructure.Migrations
 
                     b.HasIndex("AuthorGroup_ID");
 
-                    b.ToTable("AuthorGroupsMember");
+                    b.ToTable("AuthorGroupsMembers");
                 });
 
             modelBuilder.Entity("DTC.Domain.Entities.Main.Project", b =>
@@ -282,10 +297,6 @@ namespace DTC.Infrastructure.Migrations
                         .HasColumnType("text");
 
                     b.Property<string>("PhotoUrl")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("ProjectFiles")
                         .IsRequired()
                         .HasColumnType("text");
 
@@ -323,16 +334,30 @@ namespace DTC.Infrastructure.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("FilePath")
+                    b.Property<string>("ContentType")
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<string>("FileType")
+                    b.Property<string>("FileName")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<bool>("IsMainFile")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("OriginalName")
                         .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<int>("ProjectId")
                         .HasColumnType("integer");
+
+                    b.Property<long>("Size")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("StoragePath")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<DateTime>("UploadDate")
                         .HasColumnType("timestamp with time zone");
@@ -469,28 +494,6 @@ namespace DTC.Infrastructure.Migrations
                     b.ToTable("AspNetUserLogins", (string)null);
                 });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<int>", b =>
-                {
-                    b.Property<int>("UserId")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("RoleId")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("Discriminator")
-                        .IsRequired()
-                        .HasMaxLength(21)
-                        .HasColumnType("character varying(21)");
-
-                    b.HasKey("UserId", "RoleId");
-
-                    b.ToTable("AspNetUserRoles", (string)null);
-
-                    b.HasDiscriminator().HasValue("IdentityUserRole<int>");
-
-                    b.UseTphMappingStrategy();
-                });
-
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<int>", b =>
                 {
                     b.Property<int>("UserId")
@@ -510,13 +513,23 @@ namespace DTC.Infrastructure.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("DTC.Domain.Entities.Identity.UserRoles", b =>
+            modelBuilder.Entity("DTC.Domain.Entities.Identity.AppUserRole", b =>
                 {
-                    b.HasBaseType("Microsoft.AspNetCore.Identity.IdentityUserRole<int>");
+                    b.HasOne("DTC.Domain.Entities.Identity.Role", "Role")
+                        .WithMany("UserRoles")
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
-                    b.HasIndex("RoleId");
+                    b.HasOne("DTC.Domain.Entities.Identity.User", "User")
+                        .WithMany("UserRoles")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
-                    b.HasDiscriminator().HasValue("UserRoles");
+                    b.Navigation("Role");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("DTC.Domain.Entities.Identity.RefreshToken", b =>
@@ -598,7 +611,7 @@ namespace DTC.Infrastructure.Migrations
             modelBuilder.Entity("DTC.Domain.Entities.Main.ProjectFile", b =>
                 {
                     b.HasOne("DTC.Domain.Entities.Main.Project", "Project")
-                        .WithMany()
+                        .WithMany("Files")
                         .HasForeignKey("ProjectId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -642,25 +655,6 @@ namespace DTC.Infrastructure.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("DTC.Domain.Entities.Identity.UserRoles", b =>
-                {
-                    b.HasOne("DTC.Domain.Entities.Identity.Role", "Role")
-                        .WithMany("UserRoles")
-                        .HasForeignKey("RoleId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("DTC.Domain.Entities.Identity.User", "User")
-                        .WithMany("Roles")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Role");
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("DTC.Domain.Entities.Identity.Role", b =>
                 {
                     b.Navigation("UserRoles");
@@ -670,7 +664,7 @@ namespace DTC.Infrastructure.Migrations
                 {
                     b.Navigation("RefreshTokens");
 
-                    b.Navigation("Roles");
+                    b.Navigation("UserRoles");
                 });
 
             modelBuilder.Entity("DTC.Domain.Entities.Main.Author", b =>
@@ -683,6 +677,11 @@ namespace DTC.Infrastructure.Migrations
                     b.Navigation("Members");
 
                     b.Navigation("Projects");
+                });
+
+            modelBuilder.Entity("DTC.Domain.Entities.Main.Project", b =>
+                {
+                    b.Navigation("Files");
                 });
 
             modelBuilder.Entity("DTC.Domain.Entities.Main.ProjectType", b =>

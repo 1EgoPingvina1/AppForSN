@@ -18,6 +18,7 @@ using DTC.API.Middleware;
 using Serilog;
 using DTC.Application.Interfaces.RabbitMQ;
 using DTC.Infrastructure.Services.RabbitMQ;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace DTC.API
 {
@@ -80,7 +81,15 @@ namespace DTC.API
             }
                 });
             });
-
+            builder.Services.AddCors(opt =>
+            {
+                opt.AddPolicy("AllowSpecificOrigin", policy =>
+                {
+                    policy.WithOrigins("http://localhost:4200")
+                    .AllowAnyHeader()
+                    .AllowAnyMethod();
+                });
+            }); 
             builder.Services.AddAuthentication(options =>
             {
                 options.DefaultAuthenticateScheme = "Bearer";
@@ -99,7 +108,7 @@ namespace DTC.API
             Encoding.UTF8.GetBytes(builder.Configuration["JwtSettings:Secret"]))
                 };
             });
-
+            
             Log.Logger = new LoggerConfiguration()
                 .MinimumLevel.Information()
                 .WriteTo.Console()
@@ -110,7 +119,7 @@ namespace DTC.API
             var app = builder.Build();
             app.UseMiddleware<ExceptionHandlingMiddleware>();
             app.UseMiddleware<TransactionMiddleware>();
-
+            app.UseCors("AllowSpecificOrigin");
             if (app.Environment.IsDevelopment())
             {
                 app.UseSwagger();

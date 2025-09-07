@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using DTC.Application.DTO;
 using DTC.Application.DTO.Project;
 using DTC.Application.Interfaces;
 using DTC.Application.Interfaces.RabbitMQ;
@@ -17,6 +18,7 @@ namespace DTC.Infrastructure.Services
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _rabbitMqService = rabbitMqService;
+
         }
 
         public async Task<ProjectResponseDto> CreateAsync(CreateProjectDTO createDto)
@@ -73,5 +75,9 @@ namespace DTC.Infrastructure.Services
             project.StatusId = 2;
             _rabbitMqService.Publish(new { ProjectId = id, SubmittedAt = DateTime.UtcNow }, "project-review-queue");
         }
+
+        public async Task<IEnumerable<ProjectType>> GetProjectTypesAsync() => await _unitOfWork.ProjectRepository.GetProjectTypeAsync();
+
+       
     }
 }

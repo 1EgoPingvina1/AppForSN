@@ -20,6 +20,8 @@ namespace DTC.Infrastructure.Repositories
             return await _context.Projects.FindAsync(id);
         }
 
+        public async Task<IEnumerable<ProjectType>> GetProjectTypeAsync() => await _context.ProjectTypes.ToListAsync();
+
         public void Add(Project project)
         {
             _context.Projects.Add(project);

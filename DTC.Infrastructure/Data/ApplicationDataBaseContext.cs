@@ -1,11 +1,20 @@
 ﻿using DTC.Domain.Entities.Identity;
 using DTC.Domain.Entities.Main;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using System.Reflection.Emit;
 
 namespace DTC.Infrastructure.Data
 {
-    public class ApplicationDataBaseContext : IdentityDbContext<User, Role, int>
+    public class ApplicationDataBaseContext : IdentityDbContext<User,
+                                                 Role,
+                                                 int,
+                                                 IdentityUserClaim<int>,
+                                                 AppUserRole,
+                                                 IdentityUserLogin<int>,
+                                                 IdentityRoleClaim<int>,
+                                                 IdentityUserToken<int>>
     {
         //Authorization domain
         public DbSet<RefreshToken> RefreshTokens { get; set; }
@@ -20,7 +29,7 @@ namespace DTC.Infrastructure.Data
 
         public DbSet<Author> Authors { get; set; }
         public DbSet<AuthorGroup> AuthorGroups { get; set; }
-        public DbSet<AuthorGroupMember> AuthorGroupsMember { get; set; }
+        public DbSet<AuthorGroupMember> AuthorGroupsMembers { get; set; }
 
         public ApplicationDataBaseContext(DbContextOptions<ApplicationDataBaseContext> options)
             : base(options) { }
@@ -31,24 +40,24 @@ namespace DTC.Infrastructure.Data
         {
             base.OnModelCreating(builder);
 
+            builder.Entity<User>()
+                .HasMany(ur => ur.UserRoles)
+                .WithOne(u => u.User)
+                .HasForeignKey(ur => ur.UserId)
+                .IsRequired();
+
+            builder.Entity<Role>()
+                .HasMany(ur => ur.UserRoles)
+                .WithOne(u => u.Role)
+                .HasForeignKey(ur => ur.RoleId)
+                 .IsRequired();
+
             builder.Entity<ProjectStatus>().HasData(
             new ProjectStatus { Id = 1, Name = "Registered" },
             new ProjectStatus { Id = 2, Name = "InReview" },
             new ProjectStatus { Id = 3, Name = "Approved" },
             new ProjectStatus { Id = 4, Name = "Rejected" });
 
-            builder.Entity<UserRoles>(entity =>
-            {
-                entity.HasOne(ur => ur.User)
-                    .WithMany(u => u.Roles)
-                    .HasForeignKey(ur => ur.UserId)
-                    .IsRequired();
-
-                entity.HasOne(ur => ur.Role)
-                    .WithMany(r => r.UserRoles)
-                    .HasForeignKey(ur => ur.RoleId)
-                    .IsRequired();
-            });
             builder.Entity<RefreshToken>(entity =>
             {
                 entity.HasKey(rt => rt.Id);

@@ -1,84 +1,42 @@
 ﻿using AppForSNForUsers.Contracts;
-using AppForSNForUsers.DTOs;
-using System;
+using AppForSNForUsers.Services;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using System.ComponentModel;
-using System.Net.Http;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Input;
 
 namespace AppForSNForUsers.ViewModels
 {
-    public class LoginViewModel : INotifyPropertyChanged
+    public partial class LoginViewModel : ObservableObject
     {
         private readonly IAuthService _authService;
-        private readonly MainViewModel _mainViewModel;
-
-
-        public ICommand LoginCommand { get; }
-        public RelayCommand NavigateToRegistrationCommand { get; }
-        public LoginViewModel(MainViewModel mainViewModel, IAuthService authService)
+        private readonly INavigationService _navigationService;
+        public LoginViewModel(IAuthService authService, INavigationService navigationService)
         {
             _authService = authService;
-            _mainViewModel = mainViewModel;
-            LoginCommand = new RelayCommand(async () => await LoginAsync());
-            NavigateToRegistrationCommand = new RelayCommand(OpenRegistrationWindow);
-
+            _navigationService = navigationService;
         }
 
+        [ObservableProperty]
         private string _username;
-        public string Username
-        {
-            get => _username;
-            set 
-            { 
-                _username = value; 
-                OnPropertyChanged();
-            }
-        }
 
-        public string Password { get; set; }
+        [ObservableProperty]
+        public string _password { get; set; }
 
-        private string _errorMessage;
-        public string ErrorMessage
-        {
-            get => _errorMessage;
-            set { _errorMessage = value; OnPropertyChanged(); }
-        }
-
-
-
+        [RelayCommand]
         private async Task LoginAsync()
         {
-            ErrorMessage = "";
-
-            try
+            bool success = await _authService.LoginAsync(Username, Password);
+            if (success)
             {
-                var dto = new LoginDTO { Username = Username, Password = Password };
-                var user = await _authService.LoginAsync(dto);
-                if(user != null) 
-                {
-                    Password = string.Empty;
-                    App.CurrentUserToken = user.Token;
-                    _mainViewModel.Navigate("Home");
-                }
-                ErrorMessage = "Неверный логин / пароль";
+                // Если логин успешен, переходим на страницу проектов
+                _navigationService.NavigateTo<ProjectsViewModel>();
             }
-            catch (HttpRequestException ex)
+            else
             {
-                ErrorMessage = $"Ошибка запроса: {ex.Message}";
+                // Показать ошибку
             }
-            catch (Exception ex)
-            {
-                ErrorMessage = $"Ошибка: {ex.Message}";
-            }
-        }
-
-
-        private void OpenRegistrationWindow()
-        {
-            _mainViewModel.Navigate("Register");
         }
 
         public event PropertyChangedEventHandler PropertyChanged;

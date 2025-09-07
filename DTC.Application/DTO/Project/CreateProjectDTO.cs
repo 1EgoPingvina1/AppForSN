@@ -6,15 +6,31 @@ namespace DTC.Application.DTO.Project
     public class CreateProjectDTO
     {
         [Required]
-        [StringLength(100)]
+        [StringLength(200)]
         public string Name { get; set; }
+
         [Required]
+        [StringLength(50)]
         public string Version { get; set; }
-        [StringLength(2000)]
+
+        public DateTime VersionDate { get; set; } = DateTime.UtcNow;
+
+        [StringLength(1000)]
         public string Description { get; set; }
-        public int ProjectType_ID { get; set; }
-        public int AuthorGroup_ID { get; set; }
-        public IFormFile Photo { get; set; }
-        public IFormFile ProjectFiles { get; set; }
+
+        public string PhotoUrl { get; set; }
+
+        [Required]
+        public int CreaterId { get; set; }
+
+        public int? StatusId { get; set; }
+
+        [Required]
+        public int ProjectTypeId { get; set; }
+
+        [Required]
+        public int AuthorGroupId { get; set; }
+
+        public ICollection<IFormFile> ProjectFiles { get; set; } = new List<IFormFile>();
     }
 }

@@ -33,12 +33,12 @@ namespace DTC.Tests.Services
             var createDto = new CreateProjectDTO
             {
                 Name = "Test Project",
+                CreaterId = 1,
+                StatusId = 1,
                 Version = "5",
                 Description = "A project for testing",
-                ProjectType_ID = 1,
-                AuthorGroup_ID = 4,
-                Photo = null,
-                ProjectFiles = null
+                ProjectTypeId = 1,
+                AuthorGroupId = 4
             };
             var projectEntity = new Project { Id = 1, Name = "Test Project" };
             var projectResponseDto = new ProjectResponseDto { Id = 1, Name = "Test Project" };

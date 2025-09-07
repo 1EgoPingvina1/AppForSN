@@ -11,7 +11,8 @@ namespace DTC.Domain.Entities.Main
         public string Description { get; set; }
         public string PhotoUrl { get; set; }
         public DateTime CreatedAt { get; set; }
-        public string ProjectFiles { get; set; } // путь до архива или id
+
+        public ICollection<ProjectFile> Files { get; set; } = new List<ProjectFile>();
 
         public int CreaterId { get; set; }
         public User Creater { get; set; }

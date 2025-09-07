@@ -1,97 +1,35 @@
-﻿using AppForSNForUsers.Contracts;
-using AppForSNForUsers.Views.Authorization;
-using AppForSNForUsers.Views.Pages;
+﻿using AppForSNForUsers.Services;
+using CommunityToolkit.Mvvm.ComponentModel;
 using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Windows.Input;
+using System.Windows;
 
 namespace AppForSNForUsers.ViewModels
 {
-    public class MainViewModel : INotifyPropertyChanged, INotifyDataErrorInfo
+    public partial class MainViewModel : ObservableObject, IDisposable
     {
-        private readonly Dictionary<string, List<string>> _errors = new Dictionary<string, List<string>>();
-        private readonly IAuthService _authService;
-        public ICommand NavigateCommand { get; }
+        private readonly INavigationService _navigationService;
 
-        private object _currentView;
-        public object CurrentView
+        [ObservableProperty]
+        private object _currentViewModel;
+
+        public MainViewModel(INavigationService navigationService)
         {
-            get => _currentView;
-            set { _currentView = value; OnPropertyChanged(nameof(CurrentView)); }
+            _navigationService = navigationService;
+            // Подписываемся на событие смены ViewModel
+            _navigationService.CurrentViewModelChanged += OnCurrentViewModelChanged;
         }
 
-        public bool HasErrors => _errors.Any();
-
-        public MainViewModel(IAuthService authService)
+        private void OnCurrentViewModelChanged()
         {
-            _authService = authService;
-            NavigateCommand = new RelayCommand(() => Navigate("Login")); 
-            Navigate("Login");
-        }
-
-        protected void OnErrorsChanged(string propertyName)
-       => ErrorsChanged?.Invoke(this, new DataErrorsChangedEventArgs(propertyName));
-
-        // Добавляем ошибку для свойства
-        private void AddError(string propertyName, string error)
-        {
-            if (!_errors.ContainsKey(propertyName))
-                _errors[propertyName] = new List<string>();
-
-            if (!_errors[propertyName].Contains(error))
+            Application.Current.Dispatcher.Invoke(() =>
             {
-                _errors[propertyName].Add(error);
-                OnErrorsChanged(propertyName);
-            }
+                CurrentViewModel = _navigationService.CurrentViewModel;
+            });
         }
 
-        private void ClearErrors(string propertyName)
+        public void Dispose()
         {
-            if (_errors.Remove(propertyName))
-                OnErrorsChanged(propertyName);
-        }
-
-        public void Navigate(string viewName)
-        {
-            switch (viewName)
-            {
-                case "Home":
-                    CurrentView = new HomePage(this); 
-                    break;
-
-                case "Login":
-                    CurrentView = new LoginView(this,_authService); 
-                    break;
-                case "Register":
-                    CurrentView = new RegisterView(this,_authService);
-                    break;
-                case "MyProjects":
-                    CurrentView = new MyProjectsView();
-                    break;
-                case "UserHomePage":
-                    
-                    break;
-            }
-        }
-
-        public event PropertyChangedEventHandler PropertyChanged;
-        public event EventHandler<DataErrorsChangedEventArgs> ErrorsChanged;
-
-        protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-        }
-
-        public IEnumerable GetErrors(string propertyName)
-        {
-            if (string.IsNullOrEmpty(propertyName) || !_errors.ContainsKey(propertyName))
-                return Enumerable.Empty<string>();
-
-            return _errors[propertyName];
+            _navigationService.CurrentViewModelChanged -= OnCurrentViewModelChanged;
         }
     }
 }
