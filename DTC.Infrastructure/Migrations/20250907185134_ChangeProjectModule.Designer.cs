@@ -3,6 +3,7 @@ using System;
 using DTC.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DTC.Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDataBaseContext))]
-    partial class ApplicationDataBaseContextModelSnapshot : ModelSnapshot
+    [Migration("20250907185134_ChangeProjectModule")]
+    partial class ChangeProjectModule
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -239,6 +242,7 @@ namespace DTC.Infrastructure.Migrations
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Description")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("Name")
@@ -246,12 +250,16 @@ namespace DTC.Infrastructure.Migrations
                         .HasColumnType("text");
 
                     b.Property<string>("Photo")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<DateTime>("RegDate")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<int>("RegUserId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("RegUser_ID")
                         .HasColumnType("integer");
 
                     b.HasKey("Id");
@@ -317,6 +325,7 @@ namespace DTC.Infrastructure.Migrations
                         .HasColumnType("text");
 
                     b.Property<string>("PhotoUrl")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<int>("ProjectTypeId")
@@ -353,10 +362,6 @@ namespace DTC.Infrastructure.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("Backet")
-                        .IsRequired()
-                        .HasColumnType("text");
-
                     b.Property<string>("ContentType")
                         .IsRequired()
                         .HasColumnType("text");
@@ -377,6 +382,10 @@ namespace DTC.Infrastructure.Migrations
 
                     b.Property<long>("Size")
                         .HasColumnType("bigint");
+
+                    b.Property<string>("StoragePath")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<DateTime>("UploadDate")
                         .HasColumnType("timestamp with time zone");

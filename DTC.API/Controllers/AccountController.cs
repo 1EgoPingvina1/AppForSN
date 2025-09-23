@@ -1,6 +1,10 @@
 ﻿using DTC.Application.DTO.Account;
 using DTC.Application.Interfaces.Services;
+using DTC.Domain.Entities.Identity;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace DTC.API.Controllers
 {
@@ -9,23 +13,45 @@ namespace DTC.API.Controllers
     public class AccountController : Controller
     {
         private readonly IAuthService _authService;
-        public AccountController(IAuthService authService)
+        private readonly UserManager<User> _userManager;
+
+        public AccountController(IAuthService authService, UserManager<User> userManager)
         {
             _authService = authService;
+            _userManager = userManager;
         }
         [HttpPost("login")]
         public async Task<ActionResult<UserDTO>> Login(LoginDTO login) => Ok(await _authService.LoginAsync(login));
+
+        [Authorize]
+        [HttpGet("me")]
+        public async Task<IActionResult> Me()
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (userId == null) return Unauthorized();
+
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null) return Unauthorized();
+
+            return Ok(new
+            {
+                id = user.Id,
+                username = user.UserName,
+                email = user.Email
+            });
+        }
+
 
         [HttpPost("register")]
         public async Task<ActionResult<UserDTO>> Register(RegisterDTO register) => Ok(await _authService.RegisterAsync(register));
 
         [HttpPost("refresh-token")]
-        public async Task<ActionResult<TokenResponseDTO>> RefreshToken(RefreshTokenDTO dto) => Ok(await _authService.RefreshTokenAsync(dto));
+        public async Task<ActionResult<TokenResponseDTO>> RefreshToken() => Ok(await _authService.RefreshTokenAsync());
 
         [HttpPost("logout")]
-        public async Task<IActionResult> Logout([FromBody] LogoutDTO dto)
+        public async Task<IActionResult> Logout()
         {
-            await _authService.LogoutAsync(dto.RefreshToken);
+            await _authService.LogoutAsynс();
             return NoContent();
         }
 

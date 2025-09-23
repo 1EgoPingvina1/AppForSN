@@ -35,7 +35,7 @@ namespace DTC.Infrastructure.Services
 
 
             var group = _mapper.Map<AuthorGroup>(createDto);
-            group.RegUser_ID = creatorUserId;
+            group.RegUserId = creatorUserId;
             group.RegDate = DateTime.UtcNow;
 
             if (string.IsNullOrEmpty(group.Photo))

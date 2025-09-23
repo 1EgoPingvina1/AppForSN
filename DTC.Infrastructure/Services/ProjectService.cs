@@ -4,30 +4,43 @@ using DTC.Application.DTO.Project;
 using DTC.Application.Interfaces;
 using DTC.Application.Interfaces.RabbitMQ;
 using DTC.Application.Interfaces.Services;
+using DTC.Domain.Entities.Identity;
 using DTC.Domain.Entities.Main;
+using System.Security.Claims;
 
 namespace DTC.Infrastructure.Services
 {
     public class ProjectService : IProjectService
     {
+        private readonly IMinioFileService _minioStorage;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
         private readonly IRabbitMqPublisher _rabbitMqService;
-        public ProjectService(IUnitOfWork unitOfWork, IMapper mapper,IRabbitMqPublisher rabbitMqService)
+        public ProjectService(IUnitOfWork unitOfWork, IMapper mapper, IRabbitMqPublisher rabbitMqService, IMinioFileService minioStorage)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _rabbitMqService = rabbitMqService;
-
+            _minioStorage = minioStorage;
         }
 
-        public async Task<ProjectResponseDto> CreateAsync(CreateProjectDTO createDto)
+        public async Task<ProjectResponseDto> CreateAsync(CreateProjectDTO createDto,ClaimsPrincipal user)
         {
             var project = _mapper.Map<Project>(createDto);
 
+            var userId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            project.CreaterId = int.Parse(userId);
             project.CreatedAt = DateTime.UtcNow;
             project.VersionDate = DateTime.UtcNow;
-            project.StatusId = 1; 
+            project.StatusId = 1;
+
+            if (createDto.PhotoFile != null)
+            {
+                using var stream = createDto.PhotoFile.OpenReadStream();
+                string objectName = $"{Guid.NewGuid()}_{createDto.PhotoFile.FileName}";
+                string url = await _minioStorage.UploadFileAsync(stream, objectName, createDto.PhotoFile.ContentType, "projects");
+                project.PhotoUrl = url;
+            }
 
             _unitOfWork.ProjectRepository.Add(project);
             await _unitOfWork.SaveChangesAsync();

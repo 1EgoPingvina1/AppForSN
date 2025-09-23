@@ -2,11 +2,6 @@
 using DTC.Application.DTO;
 using DTC.Application.DTO.Project;
 using DTC.Domain.Entities.Main;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DTC.Application.AutoMapper.Mappings
 {
@@ -16,14 +11,11 @@ namespace DTC.Application.AutoMapper.Mappings
         {
             // CreateProjectDTO -> Project
             CreateMap<CreateProjectDTO, Project>()
-                .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src => DateTime.UtcNow))
-                .ForMember(dest => dest.VersionDate, opt => opt.MapFrom(src => src.VersionDate == default ? DateTime.UtcNow : src.VersionDate))
-                .ForMember(dest => dest.PhotoUrl, opt => opt.MapFrom(src => src.PhotoUrl ?? string.Empty))
-                .ForMember(dest => dest.StatusId, opt => opt.MapFrom(src => src.StatusId ?? 1)) 
                 .ForMember(dest => dest.Creater, opt => opt.Ignore())
                 .ForMember(dest => dest.Status, opt => opt.Ignore())
                 .ForMember(dest => dest.Type, opt => opt.Ignore())
-                .ForMember(dest => dest.Group, opt => opt.Ignore());
+                .ForMember(dest => dest.Group, opt => opt.Ignore())
+                .ForMember(dest => dest.Files, opt => opt.Ignore());
 
             // UpdateProjectDTO -> Project
             CreateMap<UpdateProjectDTO, Project>()

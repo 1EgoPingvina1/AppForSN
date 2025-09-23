@@ -1,5 +1,6 @@
 ﻿using DTC.Application.Interfaces.Services;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Minio;
 using Minio.DataModel.Args;
@@ -14,164 +15,53 @@ namespace DTC.Infrastructure.Services
 {
     public class MinioFileService : IMinioFileService
     {
-        private readonly IMinioClient _minioClient;
+        private readonly IMinioClient _minio;
         private readonly ILogger<MinioFileService> _logger;
-        public MinioFileService(IMinioClient minioClient, ILogger<MinioFileService> logger)
+        public MinioFileService(ILogger<MinioFileService> logger, IConfiguration configuration)
         {
-            _minioClient = minioClient;
-            _logger = logger;
+            _minio = new MinioClient()
+                .WithEndpoint(configuration["Minio:Endpoint"])
+                .WithCredentials(configuration["Minio:AccessKey"], configuration["Minio:SecretKey"])
+                .WithSSL(false)
+                .Build(); _logger = logger;
         }
 
-        private static readonly string[] AllowedExtensions = [
-                    ".jpg", ".jpeg", ".png", ".gif", ".webp",
-            ".zip", ".rar", ".7z", ".exe", ".pdf",
-            ".doc", ".docx", ".xls", ".xlsx", ".txt"
-                ];
-
-        private static readonly long MaxFileSize = 100 * 1024 * 1024;
-        
-        public async Task<bool> FileExistsAsync(string bucketName, string filePath)
+        public async Task<string> UploadFileAsync(Stream fileStream, string fileName, string contentType, string bucketName)
         {
-            try
-            {
-                var statObjectArgs = new StatObjectArgs()
-                    .WithBucket(bucketName)
-                    .WithObject(filePath);
+            // Создать bucket если нет
+            bool found = await _minio.BucketExistsAsync(new BucketExistsArgs().WithBucket(bucketName));
+            if (!found)
+                await _minio.MakeBucketAsync(new MakeBucketArgs().WithBucket(bucketName));
 
-                await _minioClient.StatObjectAsync(statObjectArgs);
-                return true;
-            }
-            catch
-            {
-                return false;
-            }
+            // Загружаем файл
+            await _minio.PutObjectAsync(new PutObjectArgs()
+                .WithBucket(bucketName)
+                .WithObject(fileName)
+                .WithStreamData(fileStream)
+                .WithObjectSize(fileStream.Length)
+                .WithContentType(contentType));
+
+            // Возвращаем URL
+            return $"{bucketName}/{fileName}";
         }
 
-        public async Task<Stream> GetFileAsync(string bucketName, string filePath)
+        public async Task<Stream> GetFileAsync(string fileName, string bucketName)
         {
-            try
-            {
-                // Проверяем существование файла
-                if (!await FileExistsAsync(bucketName, filePath))
-                    throw new FileNotFoundException($"Файл {filePath} не найден в бакете {bucketName}");
+            var ms = new MemoryStream();
+            await _minio.GetObjectAsync(new GetObjectArgs()
+                .WithBucket(bucketName)
+                .WithObject(fileName)
+                .WithCallbackStream(stream => stream.CopyTo(ms)));
 
-                var memoryStream = new MemoryStream();
-
-                var getObjectArgs = new GetObjectArgs()
-                    .WithBucket(bucketName)
-                    .WithObject(filePath)
-                    .WithCallbackStream(stream => stream.CopyTo(memoryStream));
-
-                await _minioClient.GetObjectAsync(getObjectArgs);
-                memoryStream.Position = 0;
-
-                return memoryStream;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Ошибка при получении файла {FilePath} из бакета {BucketName}",
-                    filePath, bucketName);
-                throw;
-            }
+            ms.Position = 0;
+            return ms;
         }
 
-        public async Task DeleteFileAsync(string bucketName, string filePath)
+        public async Task DeleteFileAsync(string fileName, string bucketName)
         {
-            try
-            {
-                var removeObjectArgs = new RemoveObjectArgs()
-                    .WithBucket(bucketName)
-                    .WithObject(filePath);
-
-                await _minioClient.RemoveObjectAsync(removeObjectArgs);
-
-                _logger.LogInformation("Файл {FilePath} удален из бакета {BucketName}",
-                    filePath, bucketName);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Ошибка при удалении файла {FilePath} из бакета {BucketName}",
-                    filePath, bucketName);
-                throw;
-            }
-        }
-
-
-        private async Task EnsureBucketExistsAsync(string bucketName)
-        {
-            try
-            {
-                var bucketExistsArgs = new BucketExistsArgs().WithBucket(bucketName);
-                var exists = await _minioClient.BucketExistsAsync(bucketExistsArgs);
-
-                if (!exists)
-                {
-                    var makeBucketArgs = new MakeBucketArgs().WithBucket(bucketName);
-                    await _minioClient.MakeBucketAsync(makeBucketArgs);
-
-                    _logger.LogInformation("Бакет {BucketName} создан", bucketName);
-                }
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Ошибка при проверке/создании бакета {BucketName}", bucketName);
-                throw;
-            }
-        }
-
-        public async Task<string> SaveFileAsync(IFormFile file, string bucketName, string folderPath)
-        {
-            try
-            {
-                if (file == null || file.Length == 0)
-                    throw new InvalidOperationException("Файл пустой или отсутствует.");
-
-                if (file.Length > MaxFileSize)
-                    throw new InvalidOperationException("Файл превышает допустимый размер (100MB).");
-
-                var extension = Path.GetExtension(file.FileName).ToLowerInvariant();
-                if (!AllowedExtensions.Contains(extension))
-                    throw new InvalidOperationException($"Недопустимое расширение файла: {extension}");
-
-                var safeFileName = GenerateSafeFileName(file.FileName);
-                var objectName = string.IsNullOrEmpty(folderPath)
-                    ? safeFileName
-                    : $"{folderPath.Trim('/')}/{safeFileName}";
-
-                await EnsureBucketExistsAsync(bucketName);
-
-                // Загружаем файл в MinIO
-                using var stream = file.OpenReadStream();
-
-                var putObjectArgs = new PutObjectArgs()
-                    .WithBucket(bucketName)
-                    .WithObject(objectName)
-                    .WithStreamData(stream)
-                    .WithObjectSize(file.Length)
-                    .WithContentType(file.ContentType);
-
-                await _minioClient.PutObjectAsync(putObjectArgs);
-
-                _logger.LogInformation("Файл {FileName} успешно загружен в {BucketName}/{ObjectName}",
-                    file.FileName, bucketName, objectName);
-
-                return objectName;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Ошибка при загрузке файла {FileName} в MinIO", file?.FileName);
-                throw;
-            }
-        }
-
-
-
-        private static string GenerateSafeFileName(string originalFileName)
-        {
-            var ext = Path.GetExtension(originalFileName);
-            var name = Path.GetFileNameWithoutExtension(originalFileName);
-            name = Regex.Replace(name, "[^a-zA-Z0-9-_]", "_");
-            return $"{name}_{Guid.NewGuid():N}{ext}";
+            await _minio.RemoveObjectAsync(new RemoveObjectArgs()
+                .WithBucket(bucketName)
+                .WithObject(fileName));
         }
     }
 }

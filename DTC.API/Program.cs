@@ -18,7 +18,7 @@ using DTC.API.Middleware;
 using Serilog;
 using DTC.Application.Interfaces.RabbitMQ;
 using DTC.Infrastructure.Services.RabbitMQ;
-using Microsoft.Extensions.Logging.Abstractions;
+using Minio;
 
 namespace DTC.API
 {
@@ -50,6 +50,17 @@ namespace DTC.API
             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
             builder.Services.AddScoped<IRabbitMqPublisher, RabbitMqPublisher>();
             builder.Services.Configure<RabbitMqOptions>(builder.Configuration.GetSection("RabbitMq"));
+            builder.Services.AddSingleton<IMinioFileService, MinioFileService>();
+            builder.Services.AddSingleton<IMinioClient>(sp =>
+            {
+                var config = builder.Configuration.GetSection("Minio");
+
+                return new MinioClient()
+                    .WithEndpoint(config["Endpoint"])     
+                    .WithCredentials(config["AccessKey"], config["SecretKey"])
+                    .WithSSL(false)                        
+                    .Build();
+            });
             builder.Services.AddAutoMapper(config =>
             {
                 config.AddProfile<MappingProfile>();
@@ -81,21 +92,24 @@ namespace DTC.API
             }
                 });
             });
-            builder.Services.AddCors(opt =>
-            {
-                opt.AddPolicy("AllowSpecificOrigin", policy =>
-                {
-                    policy.WithOrigins("http://localhost:4200")
-                    .AllowAnyHeader()
-                    .AllowAnyMethod();
-                });
-            }); 
+
             builder.Services.AddAuthentication(options =>
             {
                 options.DefaultAuthenticateScheme = "Bearer";
                 options.DefaultChallengeScheme = "Bearer";
             }).AddJwtBearer("Bearer", options =>
             {
+                options.Events = new Microsoft.AspNetCore.Authentication.JwtBearer.JwtBearerEvents
+                {
+                    OnMessageReceived = context =>
+                    {
+                        if (context.Request.Cookies.ContainsKey("access_token"))
+                        {
+                            context.Token = context.Request.Cookies["access_token"];
+                        }
+                        return Task.CompletedTask;
+                    }
+                };
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
                     ValidateIssuer = true,
@@ -108,17 +122,28 @@ namespace DTC.API
             Encoding.UTF8.GetBytes(builder.Configuration["JwtSettings:Secret"]))
                 };
             });
-            
+
+            builder.Services.AddCors(opt =>
+            {
+                opt.AddPolicy("AllowSpecificOrigin", policy =>
+                {
+                    policy.WithOrigins("http://localhost:4200")
+                    .AllowAnyHeader()
+                    .AllowAnyMethod()
+                    .AllowCredentials();
+                });
+            });
+
             Log.Logger = new LoggerConfiguration()
                 .MinimumLevel.Information()
                 .WriteTo.Console()
                 .CreateLogger();
 
-
             builder.Host.UseSerilog();
             var app = builder.Build();
             app.UseMiddleware<ExceptionHandlingMiddleware>();
             app.UseMiddleware<TransactionMiddleware>();
+            app.UseRouting();
             app.UseCors("AllowSpecificOrigin");
             if (app.Environment.IsDevelopment())
             {

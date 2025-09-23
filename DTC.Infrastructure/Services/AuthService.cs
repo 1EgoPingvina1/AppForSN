@@ -6,7 +6,9 @@ using DTC.Infrastructure.Data;
 using DTC.Infrastructure.Repositories;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using System.Security.Cryptography;
+using Microsoft.Extensions.Configuration;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.Internal;
 
 namespace DTC.Infrastructure.Services
 {
@@ -17,19 +19,25 @@ namespace DTC.Infrastructure.Services
         private readonly ITokenService _tokenService;
         private readonly SignInManager<User> _signInManager;
         private readonly IEmailService _emailService;
+        private readonly IConfiguration _configuration;
+        private readonly IHttpContextAccessor _HttpContextAccessor;
 
         public AuthService(
             ApplicationDataBaseContext context,
             UserManager<User> userManager,
             SignInManager<User> signInManager,
             ITokenService tokenService,
-            IEmailService emailService)
+            IEmailService emailService,
+            IConfiguration configuration,
+            IHttpContextAccessor httpContextAccessor)
         {
             _context = context;
             _userManager = userManager;
             _signInManager = signInManager;
             _tokenService = tokenService;
             _emailService = emailService;
+            _configuration = configuration;
+            _HttpContextAccessor = httpContextAccessor;
         }
 
         public async Task<UserDTO> RegisterAsync(RegisterDTO registerDTO)
@@ -56,58 +64,100 @@ namespace DTC.Infrastructure.Services
             {
                 Username = user.UserName,
                 Token = await _tokenService.GenerateJwtToken(user),
-                RefreshToken = (await GenerateRefreshToken(user)).Token
+                RefreshToken = (await _tokenService.GenerateRefreshToken(user)).Token
             };
         }
 
-        public async Task<TokenResponseDTO> RefreshTokenAsync(RefreshTokenDTO dto)
+        public async Task<TokenResponseDTO> RefreshTokenAsync()
         {
+            var request = _HttpContextAccessor.HttpContext.Request;
+            var rawToken = request.Cookies["refresh_token"];
+
+            if (string.IsNullOrEmpty(rawToken))
+                throw new HttpExeption(401, "Refresh токен отсутствует");
+
+            var hashed = _tokenService.HashToken(rawToken);
+
             var token = await _context.RefreshTokens
                 .Include(r => r.User)
-                .FirstOrDefaultAsync(t => t.Token == dto.Token);
+                .FirstOrDefaultAsync(t => t.Token == hashed);
 
             if (token == null || token.ExpiresAt < DateTime.UtcNow)
                 throw new HttpExeption(401, "Refresh токен недействителен");
 
             var accessToken = await _tokenService.GenerateJwtToken(token.User);
-            var newRefreshToken = await GenerateRefreshToken(token.User);
+            var newRefreshToken = await _tokenService.GenerateRefreshToken(token.User);
 
             _context.RefreshTokens.Remove(token);
+            await _context.SaveChangesAsync();
+
+            var response = _HttpContextAccessor.HttpContext.Response;
+            response.Cookies.Append("refresh_token", newRefreshToken.Token, new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = true,
+                SameSite = SameSiteMode.Strict,
+                Expires = newRefreshToken.ExpiresAt
+            });
 
             return new TokenResponseDTO
             {
-                AccessToken = accessToken,
-                RefreshToken = newRefreshToken.Token,
+                AccessToken = accessToken
             };
         }
-
         public async Task<UserDTO> LoginAsync(LoginDTO login)
         {
             var user = await _userManager.FindByNameAsync(login.Username);
-            if (user is null)
+            if (user == null || !await _userManager.CheckPasswordAsync(user, login.Password))
                 throw new HttpExeption(401, "Invalid username or password");
 
-            var result = await _signInManager.CheckPasswordSignInAsync(user, login.Password, false);
-            if (!result.Succeeded)
-                throw new HttpExeption(401, "Invalid username or password");
+            var jwt = await _tokenService.GenerateJwtToken(user);
+            var refreshToken = await _tokenService.GenerateRefreshToken(user);
 
-            var refreshToken = await GenerateRefreshToken(user);
+            var response = _HttpContextAccessor.HttpContext.Response;
+
+            response.Cookies.Append("access_token", jwt, new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = false,
+                SameSite = SameSiteMode.Strict,
+                Expires = DateTime.UtcNow.AddMinutes(15)
+            });
+
+            response.Cookies.Append("refresh_token", refreshToken.Token, new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = false,
+                SameSite = SameSiteMode.Lax,
+                Expires = refreshToken.ExpiresAt
+            });
 
             return new UserDTO
             {
-                Username = user.UserName,
-                Token = await _tokenService.GenerateJwtToken(user),
+                Token = jwt,
                 RefreshToken = refreshToken.Token
             };
         }
 
-        public async Task LogoutAsync(string refreshToken)
+        public async Task LogoutAsynс()
         {
-            var token = await _context.RefreshTokens.FirstOrDefaultAsync(t => t.Token == refreshToken);
+            var request = _HttpContextAccessor.HttpContext.Request;
+            var rawToken = request.Cookies["refresh_token"];
+            if (string.IsNullOrEmpty(rawToken))
+                throw new HttpExeption(404, "Refresh token not found");
+
+            var hashed = _tokenService.HashToken(rawToken);
+            var token = await _context.RefreshTokens.FirstOrDefaultAsync(x => x.Token == hashed);
+
             if (token != null)
             {
                 _context.RefreshTokens.Remove(token);
+                await _context.SaveChangesAsync();
             }
+
+            var response = _HttpContextAccessor.HttpContext.Response;
+            response.Cookies.Delete("refresh_token");
+            response.Cookies.Delete("access_token");
         }
 
         public async Task RequestPasswordResetAsync(string email)
@@ -133,7 +183,6 @@ namespace DTC.Infrastructure.Services
                 throw new HttpExeption(400, "Ошибка сброса пароля");
         }
 
-
         public async Task ConfirmEmailAsync(string userId, string token)
         {
             var user = await _userManager.FindByIdAsync(userId);
@@ -145,17 +194,7 @@ namespace DTC.Infrastructure.Services
                 throw new HttpExeption(400, "Подтверждение не удалось");
         }
 
-        public async Task<RefreshToken> GenerateRefreshToken(User user)
-        {
-            var refreshToken = new RefreshToken
-            {
-                Token = Convert.ToBase64String(RandomNumberGenerator.GetBytes(64)),
-                ExpiresAt = DateTime.UtcNow.AddDays(7),
-                UserId = user.Id
-            };
+        
 
-            await _context.RefreshTokens.AddAsync(refreshToken);
-            return refreshToken;
-        }
     }
 }

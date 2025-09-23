@@ -35,12 +35,12 @@ namespace DTC.API.Controllers
         }
 
         [HttpPost]
-        [Authorize(Roles = "Author")]
         [ProducesResponseType(typeof(ProjectResponseDto), StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> Create([FromForm] CreateProjectDTO createDto)
         {
-            var createdProject = await _projectService.CreateAsync(createDto);
+            var user = HttpContext.User;
+            var createdProject = await _projectService.CreateAsync(createDto,user);
             return Ok(createdProject);
         }
 
@@ -69,6 +69,9 @@ namespace DTC.API.Controllers
             await _projectService.DeleteAsync(id);
             return NoContent();
         }
+
+        [HttpGet("user-projects")]
+        public async Task<IEnumerable<Project>> GetUserProjects(int userId) => await _dataBaseContext.Projects.Where(p => p.CreaterId == userId).ToListAsync();
 
         [HttpGet("project-types")]
         public async Task<IEnumerable<ProjectType>> GetProjectTypes() => await _projectService.GetProjectTypesAsync();

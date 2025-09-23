@@ -4,9 +4,8 @@ namespace DTC.Application.Interfaces.Services
 {
     public interface IMinioFileService
     {
-        Task<string> SaveFileAsync(IFormFile file, string bucketName, string folderPath);
-        Task<Stream> GetFileAsync(string bucketName, string filePath);
-        Task DeleteFileAsync(string bucketName, string filePath);
-        Task<bool> FileExistsAsync(string bucketName, string filePath);
+        Task<string> UploadFileAsync(Stream fileStream, string fileName, string contentType, string bucketName);
+        Task<Stream> GetFileAsync(string fileName, string bucketName);
+        Task DeleteFileAsync(string fileName, string bucketName);
     }
 }

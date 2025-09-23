@@ -7,11 +7,10 @@ namespace DTC.Application.Interfaces.Services
     {
         Task<UserDTO> RegisterAsync(RegisterDTO register);
         Task<UserDTO> LoginAsync(LoginDTO login);
-        Task<TokenResponseDTO> RefreshTokenAsync(RefreshTokenDTO refreshToken);
-        Task LogoutAsync(string refreshToken);
+        Task<TokenResponseDTO> RefreshTokenAsync();
+        Task LogoutAsynс();
         Task RequestPasswordResetAsync(string email);
         Task ResetPasswordAsync(PasswordResetDTO dto);
         Task ConfirmEmailAsync(string userId, string token);
-        Task<RefreshToken> GenerateRefreshToken(User user);
     }
 }
