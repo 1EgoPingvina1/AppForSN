@@ -18,9 +18,9 @@ namespace DTC.Infrastructure.Services
         private readonly UserManager<User> _userManager;
         private readonly IConfiguration _configuration;
         private readonly ApplicationDataBaseContext _context;
-        public TokenService(IConfiguration config, UserManager<User> userManager, IConfiguration configuration, ApplicationDataBaseContext context)
+        public TokenService(UserManager<User> userManager, IConfiguration configuration, ApplicationDataBaseContext context)
         {
-            _key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["JwtSettings:Secret"]));
+            _key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["JwtSettings:Secret"]));
             _userManager = userManager;
             _configuration = configuration;
             _context = context;
@@ -31,7 +31,6 @@ namespace DTC.Infrastructure.Services
             var claims = new List<Claim>
             {
                 new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
-                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
                 new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
                 new Claim(ClaimTypes.Name, user.UserName ?? string.Empty)
             };

@@ -9,7 +9,7 @@ namespace DTC.Domain.Entities.Identity
         public string LastName { get; set; }
         public string Gender { get; set; }
         public bool IsAuthor { get; set; } = false;
-        public byte[]? Avatar { get; set; }
+        public string AvatarUrl { get; set; } = string.Empty;
         public string? Description { get; set; }
         public DateTime Birthday { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;

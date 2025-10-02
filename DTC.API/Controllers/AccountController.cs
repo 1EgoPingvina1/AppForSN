@@ -1,6 +1,8 @@
 ﻿using DTC.Application.DTO.Account;
+using DTC.Application.DTO.Profile;
 using DTC.Application.Interfaces.Services;
 using DTC.Domain.Entities.Identity;
+using DTC.Infrastructure.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;

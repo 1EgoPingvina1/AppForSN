@@ -32,7 +32,7 @@ namespace DTC.API
 
             builder.Services.AddControllers();
             builder.Services.AddDbContext<ApplicationDataBaseContext>(options =>
-                options.UseNpgsql(builder.Configuration.GetConnectionString("TestLocalDataBase")));
+                options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
             builder.Services.AddIdentity<User, Role>(options =>
             {
                 options.Password.RequireDigit = true;
@@ -164,12 +164,17 @@ namespace DTC.API
                 var services = scope.ServiceProvider;
                 try
                 {
+                    var db = services.GetRequiredService<ApplicationDataBaseContext>();
+                    db.Database.Migrate(); // <-- применяем миграции автоматически
+
+                    // Сидируем данные
                     await SeedData.InitializeAsync(services);
                 }
                 catch (Exception ex)
                 {
                     var logger = services.GetRequiredService<ILogger<Program>>();
                     logger.LogError(ex, "Произошла ошибка при инициализации базы данных.");
+                    throw; // можно пробросить, чтобы контейнер не стартовал с пустой БД
                 }
             }
 

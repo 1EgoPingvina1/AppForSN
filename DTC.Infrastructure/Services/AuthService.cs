@@ -1,14 +1,14 @@
 ﻿using DTC.Application.DTO.Account;
+using DTC.Application.DTO.Profile;
 using DTC.Application.ErrorHandlers;
 using DTC.Application.Interfaces.Services;
 using DTC.Domain.Entities.Identity;
 using DTC.Infrastructure.Data;
 using DTC.Infrastructure.Repositories;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.Internal;
 
 namespace DTC.Infrastructure.Services
 {
@@ -20,14 +20,13 @@ namespace DTC.Infrastructure.Services
         private readonly SignInManager<User> _signInManager;
         private readonly IEmailService _emailService;
         private readonly IConfiguration _configuration;
-        private readonly IHttpContextAccessor _HttpContextAccessor;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
         public AuthService(
             ApplicationDataBaseContext context,
             UserManager<User> userManager,
             SignInManager<User> signInManager,
             ITokenService tokenService,
-            IEmailService emailService,
             IConfiguration configuration,
             IHttpContextAccessor httpContextAccessor)
         {
@@ -35,9 +34,8 @@ namespace DTC.Infrastructure.Services
             _userManager = userManager;
             _signInManager = signInManager;
             _tokenService = tokenService;
-            _emailService = emailService;
             _configuration = configuration;
-            _HttpContextAccessor = httpContextAccessor;
+            _httpContextAccessor = httpContextAccessor;
         }
 
         public async Task<UserDTO> RegisterAsync(RegisterDTO registerDTO)
@@ -56,6 +54,7 @@ namespace DTC.Infrastructure.Services
 
             var result = await _userManager.CreateAsync(user, registerDTO.Password);
             if (!result.Succeeded) throw new HttpExeption(422, "Не удалось создать пользователя!");
+
             var roleResult = await _userManager.AddToRoleAsync(user, "User");
             if (!roleResult.Succeeded)
                 throw new HttpExeption(422, "Ошибка при назначении роли пользователю");
@@ -70,7 +69,7 @@ namespace DTC.Infrastructure.Services
 
         public async Task<TokenResponseDTO> RefreshTokenAsync()
         {
-            var request = _HttpContextAccessor.HttpContext.Request;
+            var request = _httpContextAccessor.HttpContext.Request;
             var rawToken = request.Cookies["refresh_token"];
 
             if (string.IsNullOrEmpty(rawToken))
@@ -91,12 +90,22 @@ namespace DTC.Infrastructure.Services
             _context.RefreshTokens.Remove(token);
             await _context.SaveChangesAsync();
 
-            var response = _HttpContextAccessor.HttpContext.Response;
+            var response = _httpContextAccessor.HttpContext.Response;
+
+            // Настройки для HTTP (без Secure флага)
+            response.Cookies.Append("access_token", accessToken, new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = false, // false для HTTP
+                SameSite = SameSiteMode.Lax, // Lax для лучшей совместимости
+                Expires = DateTime.UtcNow.AddMinutes(15)
+            });
+
             response.Cookies.Append("refresh_token", newRefreshToken.Token, new CookieOptions
             {
                 HttpOnly = true,
-                Secure = true,
-                SameSite = SameSiteMode.Strict,
+                Secure = false, // false для HTTP
+                SameSite = SameSiteMode.Lax,
                 Expires = newRefreshToken.ExpiresAt
             });
 
@@ -105,6 +114,7 @@ namespace DTC.Infrastructure.Services
                 AccessToken = accessToken
             };
         }
+
         public async Task<UserDTO> LoginAsync(LoginDTO login)
         {
             var user = await _userManager.FindByNameAsync(login.Username);
@@ -114,20 +124,21 @@ namespace DTC.Infrastructure.Services
             var jwt = await _tokenService.GenerateJwtToken(user);
             var refreshToken = await _tokenService.GenerateRefreshToken(user);
 
-            var response = _HttpContextAccessor.HttpContext.Response;
+            var response = _httpContextAccessor.HttpContext.Response;
 
+            // Настройки для HTTP (без Secure флага)
             response.Cookies.Append("access_token", jwt, new CookieOptions
             {
                 HttpOnly = true,
-                Secure = false,
-                SameSite = SameSiteMode.Strict,
+                Secure = false, // false для HTTP
+                SameSite = SameSiteMode.Lax,
                 Expires = DateTime.UtcNow.AddMinutes(15)
             });
 
             response.Cookies.Append("refresh_token", refreshToken.Token, new CookieOptions
             {
                 HttpOnly = true,
-                Secure = false,
+                Secure = false, // false для HTTP
                 SameSite = SameSiteMode.Lax,
                 Expires = refreshToken.ExpiresAt
             });
@@ -141,7 +152,7 @@ namespace DTC.Infrastructure.Services
 
         public async Task LogoutAsynс()
         {
-            var request = _HttpContextAccessor.HttpContext.Request;
+            var request = _httpContextAccessor.HttpContext.Request;
             var rawToken = request.Cookies["refresh_token"];
             if (string.IsNullOrEmpty(rawToken))
                 throw new HttpExeption(404, "Refresh token not found");
@@ -155,9 +166,20 @@ namespace DTC.Infrastructure.Services
                 await _context.SaveChangesAsync();
             }
 
-            var response = _HttpContextAccessor.HttpContext.Response;
-            response.Cookies.Delete("refresh_token");
-            response.Cookies.Delete("access_token");
+            var response = _httpContextAccessor.HttpContext.Response;
+
+            // Удаляем куки с теми же настройками, что и при создании
+            response.Cookies.Delete("refresh_token", new CookieOptions
+            {
+                Secure = false,
+                SameSite = SameSiteMode.Lax
+            });
+
+            response.Cookies.Delete("access_token", new CookieOptions
+            {
+                Secure = false,
+                SameSite = SameSiteMode.Lax
+            });
         }
 
         public async Task RequestPasswordResetAsync(string email)
@@ -167,7 +189,7 @@ namespace DTC.Infrastructure.Services
                 return;
 
             var token = await _userManager.GeneratePasswordResetTokenAsync(user);
-            var link = $"https://yourapp.com/reset-password?email={Uri.EscapeDataString(email)}&token={Uri.EscapeDataString(token)}";
+            var link = $"http://localhost/reset-password?email={Uri.EscapeDataString(email)}&token={Uri.EscapeDataString(token)}";
 
             await _emailService.SendAsync(email, "Сброс пароля", $"Сбросьте пароль по ссылке: {link}");
         }
@@ -194,7 +216,43 @@ namespace DTC.Infrastructure.Services
                 throw new HttpExeption(400, "Подтверждение не удалось");
         }
 
-        
+        public async Task<UserProfileDTO?> GetUserProfileAsync(int userId)
+        {
+            return await _context.Users
+            .Where(p => p.Id == userId)
+            .OrderByDescending(o => o.CreatedAt)
+            .Select(u => new UserProfileDTO
+            {
+                Id = u.Id,
+                FirstName = u.FirstName,
+                LastName = u.LastName,
+                SecondName = u.SecondName,
+                Email = u.Email!,
+                CreatedAt = u.CreatedAt,
+                Birthday = u.Birthday,
+                Gender = u.Gender,
+                IsAuthor = u.IsAuthor
+            }).FirstOrDefaultAsync();
+        }
 
+        public async Task<User> UpdateProfileAsync(int userId, UpdateProfileDto updateDto)
+        {
+            var user = await _context.Users.FindAsync(userId);
+            if (user == null) return null;
+
+            user.FirstName = updateDto.FirstName?.Trim() ?? user.FirstName;
+            user.LastName = updateDto.LastName?.Trim() ?? user.LastName;
+            user.SecondName = updateDto.SecondName?.Trim();
+            user.Birthday = (DateTime)updateDto.Birthday;
+            user.Gender = updateDto.Gender ?? user.Gender;
+
+            await _context.SaveChangesAsync();
+            return user;
+        }
+
+        public Task<string> UploadAvatarAsync(string userId, IFormFile file)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

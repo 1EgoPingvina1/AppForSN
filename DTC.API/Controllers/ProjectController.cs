@@ -34,13 +34,13 @@ namespace DTC.API.Controllers
             return Ok(project);
         }
 
+        [Authorize]
         [HttpPost]
         [ProducesResponseType(typeof(ProjectResponseDto), StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> Create([FromForm] CreateProjectDTO createDto)
         {
-            var user = HttpContext.User;
-            var createdProject = await _projectService.CreateAsync(createDto,user);
+            var createdProject = await _projectService.CreateAsync(createDto);
             return Ok(createdProject);
         }
 

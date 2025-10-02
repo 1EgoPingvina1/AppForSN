@@ -1,5 +1,7 @@
 ﻿using DTC.Application.DTO.Account;
+using DTC.Application.DTO.Profile;
 using DTC.Domain.Entities.Identity;
+using Microsoft.AspNetCore.Http;
 
 namespace DTC.Application.Interfaces.Services
 {
@@ -7,6 +9,9 @@ namespace DTC.Application.Interfaces.Services
     {
         Task<UserDTO> RegisterAsync(RegisterDTO register);
         Task<UserDTO> LoginAsync(LoginDTO login);
+        Task<UserProfileDTO?> GetUserProfileAsync(int userId);
+        Task<User> UpdateProfileAsync(int userId, UpdateProfileDto updateDto);
+        Task<string> UploadAvatarAsync(string userId, IFormFile file);
         Task<TokenResponseDTO> RefreshTokenAsync();
         Task LogoutAsynс();
         Task RequestPasswordResetAsync(string email);

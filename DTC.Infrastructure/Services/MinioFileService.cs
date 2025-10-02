@@ -1,15 +1,11 @@
-﻿using DTC.Application.Interfaces.Services;
+﻿using DTC.Application.Interfaces;
+using DTC.Application.Interfaces.Services;
+using DTC.Domain.Entities.Main;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Minio;
 using Minio.DataModel.Args;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace DTC.Infrastructure.Services
 {
@@ -20,15 +16,15 @@ namespace DTC.Infrastructure.Services
         public MinioFileService(ILogger<MinioFileService> logger, IConfiguration configuration)
         {
             _minio = new MinioClient()
-                .WithEndpoint(configuration["Minio:Endpoint"])
-                .WithCredentials(configuration["Minio:AccessKey"], configuration["Minio:SecretKey"])
+                .WithEndpoint(configuration["MinIO:Endpoint"])
+                .WithCredentials(configuration["MinIO:AccessKey"], configuration["MinIO:SecretKey"])
                 .WithSSL(false)
-                .Build(); _logger = logger;
+                .Build(); 
+            _logger = logger;
         }
 
         public async Task<string> UploadFileAsync(Stream fileStream, string fileName, string contentType, string bucketName)
         {
-            // Создать bucket если нет
             bool found = await _minio.BucketExistsAsync(new BucketExistsArgs().WithBucket(bucketName));
             if (!found)
                 await _minio.MakeBucketAsync(new MakeBucketArgs().WithBucket(bucketName));
@@ -41,7 +37,6 @@ namespace DTC.Infrastructure.Services
                 .WithObjectSize(fileStream.Length)
                 .WithContentType(contentType));
 
-            // Возвращаем URL
             return $"{bucketName}/{fileName}";
         }
 
@@ -62,6 +57,60 @@ namespace DTC.Infrastructure.Services
             await _minio.RemoveObjectAsync(new RemoveObjectArgs()
                 .WithBucket(bucketName)
                 .WithObject(fileName));
+        }
+
+        public async Task<List<ProjectFile>> UploadProjectFilesAsync(int projectId, List<IFormFile> files, string bucket, bool isMainFile)
+        {
+            var results = new List<ProjectFile>();
+
+            if (files == null || !files.Any())
+            {
+                _logger.LogWarning("Пустой список файлов для bucket {BucketName}", bucket);
+                return results;
+            }
+
+            // Проверяем bucket
+            bool found = await _minio.BucketExistsAsync(new BucketExistsArgs().WithBucket(bucket));
+            if (!found)
+                await _minio.MakeBucketAsync(new MakeBucketArgs().WithBucket(bucket));
+
+            foreach (var file in files)
+            {
+                var result = new ProjectFile
+                {
+                    OriginalName = file.FileName,
+                    Size = file.Length,
+                    ContentType = file.ContentType,
+                    ProjectId = projectId,
+                    UploadDate = DateTime.UtcNow,
+                    IsMainFile = isMainFile,
+                    Backet = bucket
+                };
+
+                try
+                {
+                    // Генерируем безопасное имя файла
+                    var safeFileName = $"{Guid.NewGuid()}_{file.FileName}";
+
+                    // Загружаем файл в MinIO
+                    using var stream = file.OpenReadStream();
+                    var filePath = await UploadFileAsync(stream, safeFileName, file.ContentType, bucket);
+
+                    result.FileName = safeFileName;
+
+                    _logger.LogInformation("Файл {FileName} успешно загружен в bucket {BucketName} как {StoredFileName}",
+                        file.FileName, bucket, safeFileName);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Ошибка при загрузке файла {FileName} в bucket {BucketName}",
+                        file.FileName, bucket);
+                }
+
+                results.Add(result);
+            }
+
+            return results;
         }
     }
 }

@@ -1,11 +1,11 @@
 ﻿using AutoMapper;
-using DTC.Application.DTO;
 using DTC.Application.DTO.Project;
+using DTC.Application.ErrorHandlers;
 using DTC.Application.Interfaces;
 using DTC.Application.Interfaces.RabbitMQ;
 using DTC.Application.Interfaces.Services;
-using DTC.Domain.Entities.Identity;
 using DTC.Domain.Entities.Main;
+using Microsoft.AspNetCore.Http;
 using System.Security.Claims;
 
 namespace DTC.Infrastructure.Services
@@ -16,19 +16,26 @@ namespace DTC.Infrastructure.Services
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
         private readonly IRabbitMqPublisher _rabbitMqService;
-        public ProjectService(IUnitOfWork unitOfWork, IMapper mapper, IRabbitMqPublisher rabbitMqService, IMinioFileService minioStorage)
+        private readonly IHttpContextAccessor _httpContextAccessor;
+
+        public ProjectService(IUnitOfWork unitOfWork, IMapper mapper, IRabbitMqPublisher rabbitMqService, IMinioFileService minioStorage, IHttpContextAccessor httpContextAccessor)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _rabbitMqService = rabbitMqService;
             _minioStorage = minioStorage;
+            _httpContextAccessor = httpContextAccessor;
         }
 
-        public async Task<ProjectResponseDto> CreateAsync(CreateProjectDTO createDto,ClaimsPrincipal user)
+        public async Task<ProjectResponseDto> CreateAsync(CreateProjectDTO createDto)
         {
             var project = _mapper.Map<Project>(createDto);
 
-            var userId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var user = _httpContextAccessor.HttpContext?.User;
+            if (user == null)
+                throw new HttpExeption(401, "Токен не действителен");
+
+            var userId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? user.FindFirst("sub")?.Value ?? throw new HttpExeption(401, "Unauthirized");
             project.CreaterId = int.Parse(userId);
             project.CreatedAt = DateTime.UtcNow;
             project.VersionDate = DateTime.UtcNow;
@@ -38,12 +45,26 @@ namespace DTC.Infrastructure.Services
             {
                 using var stream = createDto.PhotoFile.OpenReadStream();
                 string objectName = $"{Guid.NewGuid()}_{createDto.PhotoFile.FileName}";
-                string url = await _minioStorage.UploadFileAsync(stream, objectName, createDto.PhotoFile.ContentType, "projects");
+                string url = await _minioStorage.UploadFileAsync(stream, objectName, createDto.PhotoFile.ContentType, "project-photos");
                 project.PhotoUrl = url;
             }
 
+            if (createDto.Files != null && createDto.Files.Any())
+            {
+                var uploadedFiles = await _minioStorage.UploadProjectFilesAsync(
+                    project.Id,
+                    createDto.Files.ToList(),
+                    "project-files",
+                    isMainFile: false);
+
+                foreach (var file in uploadedFiles)
+                {
+                    project.Files ??= new List<ProjectFile>();
+                    project.Files.Add(file);
+                }
+            }
+
             _unitOfWork.ProjectRepository.Add(project);
-            await _unitOfWork.SaveChangesAsync();
             return _mapper.Map<ProjectResponseDto>(project);
         }
 

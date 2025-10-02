@@ -1,208 +1,199 @@
 ﻿using AutoMapper;
 using DTC.Application.DTO.Project;
-using DTC.Application.Interfaces.RabbitMQ;
+using DTC.Application.ErrorHandlers;
 using DTC.Application.Interfaces;
+using DTC.Application.Interfaces.RabbitMQ;
+using DTC.Application.Interfaces.Repo;
+using DTC.Application.Interfaces.Services;
 using DTC.Domain.Entities.Main;
 using DTC.Infrastructure.Services;
+using Microsoft.AspNetCore.Http;
 using Moq;
+using System.Collections.Generic;
+using System.Security.Claims;
+using System.Threading.Tasks;
+using Xunit;
 
-namespace DTC.Tests.Services
+namespace DTC.Tests
 {
     public class ProjectServiceTests
     {
-        //private readonly Mock<IUnitOfWork> _mockUnitOfWork;
-        //private readonly Mock<IMapper> _mockMapper;
-        //private readonly Mock<IRabbitMqPublisher> _mockRabbitMqPublisher;
-        //private readonly ProjectService _projectService;
+        private readonly Mock<IUnitOfWork> _unitOfWorkMock;
+        private readonly Mock<IMapper> _mapperMock;
+        private readonly Mock<IRabbitMqPublisher> _rabbitMqMock;
+        private readonly Mock<IMinioFileService> _minioMock;
+        private readonly Mock<IHttpContextAccessor> _httpContextMock;
 
-        //public ProjectServiceTests()
-        //{
-        //    _mockUnitOfWork = new Mock<IUnitOfWork>();
-        //    _mockMapper = new Mock<IMapper>();
-        //    _mockRabbitMqPublisher = new Mock<IRabbitMqPublisher>();
+        private readonly Mock<IProjectRepository> _projectRepoMock;
 
-        //    _projectService = new ProjectService(
-        //        _mockUnitOfWork.Object,
-        //        _mockMapper.Object,
-        //        _mockRabbitMqPublisher.Object);
-        //}
+        public ProjectServiceTests()
+        {
+            _unitOfWorkMock = new Mock<IUnitOfWork>();
+            _mapperMock = new Mock<IMapper>();
+            _rabbitMqMock = new Mock<IRabbitMqPublisher>();
+            _minioMock = new Mock<IMinioFileService>();
+            _httpContextMock = new Mock<IHttpContextAccessor>();
 
-        //[Fact]
-        //public async Task CreateAsync_ShouldAddProjectAndReturnDto()
-        //{
-        //    var createDto = new CreateProjectDTO
-        //    {
-        //        Name = "Test Project",
-        //        CreaterId = 1,
-        //        StatusId = 1,
-        //        Version = "5",
-        //        Description = "A project for testing",
-        //        ProjectTypeId = 1,
-        //        AuthorGroupId = 4
-        //    };
-        //    var projectEntity = new Project { Id = 1, Name = "Test Project" };
-        //    var projectResponseDto = new ProjectResponseDto { Id = 1, Name = "Test Project" };
+            _projectRepoMock = new Mock<IProjectRepository>();
+            _unitOfWorkMock.Setup(u => u.ProjectRepository).Returns(_projectRepoMock.Object);
+        }
 
-        //    _mockMapper.Setup(m => m.Map<Project>(createDto)).Returns(projectEntity);
-        //    _mockMapper.Setup(m => m.Map<ProjectResponseDto>(projectEntity)).Returns(projectResponseDto);
+        private ProjectService CreateService() =>
+            new ProjectService(_unitOfWorkMock.Object, _mapperMock.Object, _rabbitMqMock.Object, _minioMock.Object, _httpContextMock.Object);
 
-        //    var result = await _projectService.CreateAsync(createDto);
+        // --- CreateAsync ---
+        [Fact]
+        public async Task CreateAsync_ShouldThrow_WhenNoUser()
+        {
+            _httpContextMock.Setup(x => x.HttpContext).Returns((HttpContext)null);
 
-        //    // Assert
-        //    _mockUnitOfWork.Verify(u => u.ProjectRepository.Add(It.Is<Project>(p =>
-        //        p.Name == createDto.Name &&
-        //        p.CreatedAt.Kind == DateTimeKind.Utc &&
-        //        p.VersionDate.Kind == DateTimeKind.Utc && 
-        //        p.StatusId == 1
-        //    )), Times.Once);
-        //    Assert.NotNull(result);
-        //    Assert.Equal(projectResponseDto.Id, result.Id);
-        //    Assert.Equal(projectResponseDto.Name, result.Name);
-        //}
+            var service = CreateService();
+            await Assert.ThrowsAsync<HttpExeption>(() => service.CreateAsync(new CreateProjectDTO()));
+        }
 
-        //[Fact]
-        //public async Task GetByIdAsync_ShouldReturnProjectDto_WhenProjectExists()
-        //{
-        //    // Arrange
-        //    var projectId = 1;
-        //    var projectEntity = new Project { Id = projectId, Name = "Existing Project" };
-        //    var projectResponseDto = new ProjectResponseDto { Id = projectId, Name = "Existing Project" };
+        [Fact]
+        public async Task CreateAsync_ShouldCreateProject_WhenUserValid()
+        {
+            var claims = new ClaimsPrincipal(new ClaimsIdentity(new Claim[]
+            {
+                new Claim(ClaimTypes.NameIdentifier, "123")
+            }, "mock"));
+            var context = new DefaultHttpContext { User = claims };
+            _httpContextMock.Setup(x => x.HttpContext).Returns(context);
 
-        //    _mockUnitOfWork.Setup(u => u.ProjectRepository.GetByIdAsync(projectId)).ReturnsAsync(projectEntity);
-        //    _mockMapper.Setup(m => m.Map<ProjectResponseDto>(projectEntity)).Returns(projectResponseDto);
+            var dto = new CreateProjectDTO { Name = "Test Project" };
+            var project = new Project { Id = 1, CreaterId = 123, StatusId = 1 };
 
-        //    // Act
-        //    var result = await _projectService.GetByIdAsync(projectId);
+            _mapperMock.Setup(m => m.Map<Project>(dto)).Returns(project);
+            _mapperMock.Setup(m => m.Map<ProjectResponseDto>(project))
+                .Returns(new ProjectResponseDto { Id = 1, Name = "Test Project" });
 
-        //    // Assert
-        //    Assert.NotNull(result);
-        //    Assert.Equal(projectId, result.Id);
-        //    Assert.Equal(projectResponseDto.Name, result.Name);
-        //}
+            _projectRepoMock.Setup(r => r.Add(It.IsAny<Project>()));
 
-        //[Fact]
-        //public async Task GetByIdAsync_ShouldReturnNull_WhenProjectDoesNotExist()
-        //{
-        //    // Arrange
-        //    var projectId = 99;
+            var service = CreateService();
+            var result = await service.CreateAsync(dto);
 
-        //    _mockUnitOfWork.Setup(u => u.ProjectRepository.GetByIdAsync(projectId)).ReturnsAsync((Project)null);
+            Assert.Equal(1, result.Id);
+            _unitOfWorkMock.Verify(u => u.SaveChangesAsync(), Times.Once);
+        }
 
-        //    // Act
-        //    var result = await _projectService.GetByIdAsync(projectId);
+        // --- GetByIdAsync ---
+        [Fact]
+        public async Task GetByIdAsync_ShouldReturnDto_WhenFound()
+        {
+            var project = new Project { Id = 5, Name = "Found" };
+            _projectRepoMock.Setup(r => r.GetByIdAsync(5)).ReturnsAsync(project);
+            _mapperMock.Setup(m => m.Map<ProjectResponseDto>(project))
+                .Returns(new ProjectResponseDto { Id = 5, Name = "Found" });
 
-        //    // Assert
-        //    Assert.Null(result);
-        //}
+            var service = CreateService();
+            var result = await service.GetByIdAsync(5);
 
-        //[Fact]
-        //public async Task UpdateAsync_ShouldUpdateProject_WhenProjectExists()
-        //{
-        //    // Arrange
-        //    var projectId = 1;
-        //    var updateDto = new UpdateProjectDTO { Name = "Updated Project Name", Description = "Updated description" };
-        //    var existingProject = new Project { Id = projectId, Name = "Original Name", Description = "Original description", StatusId = 1 };
+            Assert.Equal(5, result.Id);
+        }
 
-        //    _mockUnitOfWork.Setup(u => u.ProjectRepository.GetByIdAsync(projectId)).ReturnsAsync(existingProject);
+        [Fact]
+        public async Task GetByIdAsync_ShouldReturnNull_WhenNotFound()
+        {
+            _projectRepoMock.Setup(r => r.GetByIdAsync(99)).ReturnsAsync((Project)null);
 
-        //    // Act
-        //    await _projectService.UpdateAsync(projectId, updateDto);
+            var service = CreateService();
+            var result = await service.GetByIdAsync(99);
 
-        //    // Assert
-        //    _mockMapper.Verify(m => m.Map(updateDto, existingProject), Times.Once);
-        //    _mockUnitOfWork.Verify(u => u.ProjectRepository.Update(existingProject), Times.Once);
-        //}
+            Assert.Null(result);
+        }
 
-        //[Fact]
-        //public async Task UpdateAsync_ShouldThrowKeyNotFoundException_WhenProjectDoesNotExist()
-        //{
-        //    // Arrange
-        //    var projectId = 99;
-        //    var updateDto = new UpdateProjectDTO { Name = "Non Existent Project" };
+        // --- UpdateAsync ---
+        [Fact]
+        public async Task UpdateAsync_ShouldThrow_WhenNotFound()
+        {
+            _projectRepoMock.Setup(r => r.GetByIdAsync(10)).ReturnsAsync((Project)null);
 
-        //    _mockUnitOfWork.Setup(u => u.ProjectRepository.GetByIdAsync(projectId)).ReturnsAsync((Project)null);
+            var service = CreateService();
+            await Assert.ThrowsAsync<KeyNotFoundException>(() =>
+                service.UpdateAsync(10, new UpdateProjectDTO()));
+        }
 
-        //    // Act & Assert
-        //    await Assert.ThrowsAsync<KeyNotFoundException>(() => _projectService.UpdateAsync(projectId, updateDto));
-        //}
+        [Fact]
+        public async Task UpdateAsync_ShouldUpdate_WhenFound()
+        {
+            var project = new Project { Id = 2, Name = "Old" };
+            _projectRepoMock.Setup(r => r.GetByIdAsync(2)).ReturnsAsync(project);
 
-        //[Fact]
-        //public async Task DeleteAsync_ShouldDeleteProject_WhenProjectExists()
-        //{
-        //    // Arrange
-        //    var projectId = 1;
-        //    var projectEntity = new Project { Id = projectId, Name = "Project to Delete" };
+            var service = CreateService();
+            await service.UpdateAsync(2, new UpdateProjectDTO { Name = "New" });
 
-        //    _mockUnitOfWork.Setup(u => u.ProjectRepository.GetByIdAsync(projectId)).ReturnsAsync(projectEntity);
+            _projectRepoMock.Verify(r => r.Update(project), Times.Once);
+        }
 
-        //    // Act
-        //    await _projectService.DeleteAsync(projectId);
+        // --- DeleteAsync ---
+        [Fact]
+        public async Task DeleteAsync_ShouldDelete_WhenFound()
+        {
+            var project = new Project { Id = 3 };
+            _projectRepoMock.Setup(r => r.GetByIdAsync(3)).ReturnsAsync(project);
 
-        //    // Assert
-        //    _mockUnitOfWork.Verify(u => u.ProjectRepository.DeleteByIdAsync(projectEntity), Times.Once);
-        //}
+            var service = CreateService();
+            await service.DeleteAsync(3);
 
-        //[Fact]
-        //public async Task DeleteAsync_ShouldDoNothing_WhenProjectDoesNotExist()
-        //{
-        //    // Arrange
-        //    var projectId = 99;
+            _projectRepoMock.Verify(r => r.DeleteByIdAsync(project), Times.Once);
+        }
 
-        //    _mockUnitOfWork.Setup(u => u.ProjectRepository.GetByIdAsync(projectId)).ReturnsAsync((Project)null);
+        [Fact]
+        public async Task DeleteAsync_ShouldDoNothing_WhenNotFound()
+        {
+            _projectRepoMock.Setup(r => r.GetByIdAsync(50)).ReturnsAsync((Project)null);
 
-        //    // Act
-        //    await _projectService.DeleteAsync(projectId);
+            var service = CreateService();
+            await service.DeleteAsync(50);
 
-        //    // Assert
-        //    _mockUnitOfWork.Verify(u => u.ProjectRepository.DeleteByIdAsync(It.IsAny<Project>()), Times.Never);
-        //}
+            _projectRepoMock.Verify(r => r.DeleteByIdAsync(It.IsAny<Project>()), Times.Never);
+        }
 
-        //[Fact]
-        //public async Task SubmitForReviewAsync_ShouldUpdateStatusAndPublishMessage_WhenProjectIsRegistered()
-        //{
-        //    // Arrange
-        //    var projectId = 1;
-        //    var projectEntity = new Project { Id = projectId, Name = "Reviewable Project", StatusId = 1 }; // StatusId = 1 means Registered
+        // --- SubmitForReviewAsync ---
+        [Fact]
+        public async Task SubmitForReviewAsync_ShouldThrow_WhenNotFound()
+        {
+            _projectRepoMock.Setup(r => r.GetByIdAsync(99)).ReturnsAsync((Project)null);
 
-        //    _mockUnitOfWork.Setup(u => u.ProjectRepository.GetByIdAsync(projectId)).ReturnsAsync(projectEntity);
+            var service = CreateService();
+            await Assert.ThrowsAsync<KeyNotFoundException>(() => service.SubmitForReviewAsync(99));
+        }
 
-        //    // Act
-        //    await _projectService.SubmitForReviewAsync(projectId);
+        [Fact]
+        public async Task SubmitForReviewAsync_ShouldThrow_WhenStatusNotRegistered()
+        {
+            var project = new Project { Id = 10, StatusId = 3 };
+            _projectRepoMock.Setup(r => r.GetByIdAsync(10)).ReturnsAsync(project);
 
-        //    // Assert
-        //    Assert.Equal(2, projectEntity.StatusId); // StatusId should be updated to 2 (Submitted for review)
-        //    _mockRabbitMqPublisher.Verify(r => r.Publish(
-        //        It.Is<object>(msg => (int)msg.GetType().GetProperty("ProjectId").GetValue(msg) == projectId),
-        //        "project-review-queue"), Times.Once);
-        //}
+            var service = CreateService();
+            await Assert.ThrowsAsync<InvalidOperationException>(() => service.SubmitForReviewAsync(10));
+        }
 
-        //[Fact]
-        //public async Task SubmitForReviewAsync_ShouldThrowKeyNotFoundException_WhenProjectDoesNotExist()
-        //{
-        //    // Arrange
-        //    var projectId = 99;
+        [Fact]
+        public async Task SubmitForReviewAsync_ShouldPublish_WhenValid()
+        {
+            var project = new Project { Id = 7, StatusId = 1 };
+            _projectRepoMock.Setup(r => r.GetByIdAsync(7)).ReturnsAsync(project);
 
-        //    _mockUnitOfWork.Setup(u => u.ProjectRepository.GetByIdAsync(projectId)).ReturnsAsync((Project)null);
+            var service = CreateService();
+            await service.SubmitForReviewAsync(7);
 
-        //    // Act & Assert
-        //    await Assert.ThrowsAsync<KeyNotFoundException>(() => _projectService.SubmitForReviewAsync(projectId));
-        //}
+            Assert.Equal(2, project.StatusId);
+            _rabbitMqMock.Verify(r => r.Publish(It.IsAny<object>(), "project-review-queue"), Times.Once);
+        }
 
-        //[Fact]
-        //public async Task SubmitForReviewAsync_ShouldThrowInvalidOperationException_WhenProjectIsNotRegistered()
-        //{
-        //    // Arrange
-        //    var projectId = 1;
-        //    var projectEntity = new Project { Id = projectId, Name = "Already Reviewed Project", StatusId = 2 }; // StatusId = 2 means Submitted
+        // --- GetProjectTypesAsync ---
+        [Fact]
+        public async Task GetProjectTypesAsync_ShouldReturnList()
+        {
+            var types = new List<ProjectType> { new ProjectType { Id = 1, Name = "TypeA" } };
+            _projectRepoMock.Setup(r => r.GetProjectTypeAsync()).ReturnsAsync(types);
 
-        //    _mockUnitOfWork.Setup(u => u.ProjectRepository.GetByIdAsync(projectId)).ReturnsAsync(projectEntity);
+            var service = CreateService();
+            var result = await service.GetProjectTypesAsync();
 
-        //    // Act & Assert
-        //    await Assert.ThrowsAsync<InvalidOperationException>(() => _projectService.SubmitForReviewAsync(projectId));
-        //    // Ensure status was not changed and no message was published
-        //    Assert.Equal(2, projectEntity.StatusId);
-        //    _mockRabbitMqPublisher.Verify(r => r.Publish(It.IsAny<object>(), It.IsAny<string>()), Times.Never);
-        //}
+            Assert.Single(result);
+        }
     }
 }
-
