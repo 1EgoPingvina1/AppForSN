@@ -38,7 +38,7 @@ namespace DTC.API.Controllers
         [HttpPost]
         [ProducesResponseType(typeof(AuthorGroupResponseDto), StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> CreateGroup([FromBody] CreateAuthorGroupDto createDto)
+        public async Task<IActionResult> CreateGroup([FromForm] CreateAuthorGroupDto createDto)
         {
             var creatorIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (!int.TryParse(creatorIdString, out var creatorId))

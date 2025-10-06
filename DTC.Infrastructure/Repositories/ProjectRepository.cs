@@ -1,5 +1,4 @@
-﻿using DTC.Application.DTO;
-using DTC.Application.Interfaces.Repo;
+﻿using DTC.Application.Interfaces.Repo;
 using DTC.Domain.Entities.Main;
 using DTC.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
@@ -36,5 +35,7 @@ namespace DTC.Infrastructure.Repositories
         {
             _context.Projects.Remove(project);
         }
+
+        public async Task<IEnumerable<Project?>> GetAllAsync() => await _context.Projects.ToListAsync();
     }
 }

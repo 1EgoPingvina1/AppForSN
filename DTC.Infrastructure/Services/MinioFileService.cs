@@ -1,8 +1,6 @@
-﻿using DTC.Application.Interfaces;
-using DTC.Application.Interfaces.Services;
+﻿using DTC.Application.Interfaces.Services;
 using DTC.Domain.Entities.Main;
 using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Minio;
 using Minio.DataModel.Args;
@@ -11,31 +9,27 @@ namespace DTC.Infrastructure.Services
 {
     public class MinioFileService : IMinioFileService
     {
-        private readonly IMinioClient _minio;
+        private readonly IMinioClient _minioStorage;
         private readonly ILogger<MinioFileService> _logger;
-        public MinioFileService(ILogger<MinioFileService> logger, IConfiguration configuration)
+        public MinioFileService(ILogger<MinioFileService> logger,IMinioClient minio)
         {
-            _minio = new MinioClient()
-                .WithEndpoint(configuration["MinIO:Endpoint"])
-                .WithCredentials(configuration["MinIO:AccessKey"], configuration["MinIO:SecretKey"])
-                .WithSSL(false)
-                .Build(); 
+            _minioStorage = minio;
             _logger = logger;
         }
 
         public async Task<string> UploadFileAsync(Stream fileStream, string fileName, string contentType, string bucketName)
         {
-            bool found = await _minio.BucketExistsAsync(new BucketExistsArgs().WithBucket(bucketName));
-            if (!found)
-                await _minio.MakeBucketAsync(new MakeBucketArgs().WithBucket(bucketName));
+            bool backetIsExists = await _minioStorage.BucketExistsAsync(new BucketExistsArgs().WithBucket(bucketName));
+            if (!backetIsExists)
+                await _minioStorage.MakeBucketAsync(new MakeBucketArgs().WithBucket(bucketName));
 
-            // Загружаем файл
-            await _minio.PutObjectAsync(new PutObjectArgs()
+            await _minioStorage.PutObjectAsync(new PutObjectArgs()
                 .WithBucket(bucketName)
                 .WithObject(fileName)
                 .WithStreamData(fileStream)
                 .WithObjectSize(fileStream.Length)
-                .WithContentType(contentType));
+                .WithContentType(contentType)
+                );
 
             return $"{bucketName}/{fileName}";
         }
@@ -43,7 +37,7 @@ namespace DTC.Infrastructure.Services
         public async Task<Stream> GetFileAsync(string fileName, string bucketName)
         {
             var ms = new MemoryStream();
-            await _minio.GetObjectAsync(new GetObjectArgs()
+            await   _minioStorage.GetObjectAsync(new GetObjectArgs()
                 .WithBucket(bucketName)
                 .WithObject(fileName)
                 .WithCallbackStream(stream => stream.CopyTo(ms)));
@@ -54,7 +48,7 @@ namespace DTC.Infrastructure.Services
 
         public async Task DeleteFileAsync(string fileName, string bucketName)
         {
-            await _minio.RemoveObjectAsync(new RemoveObjectArgs()
+            await _minioStorage.RemoveObjectAsync(new RemoveObjectArgs()
                 .WithBucket(bucketName)
                 .WithObject(fileName));
         }
@@ -69,10 +63,9 @@ namespace DTC.Infrastructure.Services
                 return results;
             }
 
-            // Проверяем bucket
-            bool found = await _minio.BucketExistsAsync(new BucketExistsArgs().WithBucket(bucket));
+            bool found = await _minioStorage.BucketExistsAsync(new BucketExistsArgs().WithBucket(bucket));
             if (!found)
-                await _minio.MakeBucketAsync(new MakeBucketArgs().WithBucket(bucket));
+                await _minioStorage.MakeBucketAsync(new MakeBucketArgs().WithBucket(bucket));
 
             foreach (var file in files)
             {

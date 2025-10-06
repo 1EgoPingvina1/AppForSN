@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.AspNetCore.Http;
+using System.ComponentModel.DataAnnotations;
 
 namespace DTC.Application.DTO
 {
@@ -10,6 +11,6 @@ namespace DTC.Application.DTO
         [StringLength(2000)]
         public string? Description { get; set; }
 
-        public string? Photo {  get; set; }
+        public IFormFile? Photo {  get; set; }
     }
 }

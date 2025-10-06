@@ -1,24 +1,25 @@
+using DTC.API.Extensions;
 using DTC.API.Helpers;
 using DTC.API.middleware;
+using DTC.API.Middleware;
+using DTC.Application.AutoMapper.Mappings;
+using DTC.Application.Interfaces;
+using DTC.Application.Interfaces.RabbitMQ;
+using DTC.Application.Interfaces.Repo;
+using DTC.Application.Interfaces.Services;
 using DTC.Domain;
 using DTC.Domain.Entities.Identity;
-using DTC.Infrastructure.Services;
 using DTC.Infrastructure.Data;
 using DTC.Infrastructure.Repositories;
+using DTC.Infrastructure.Services;
+using DTC.Infrastructure.Services.RabbitMQ;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using System.Text;
-using DTC.Application.Interfaces.Services;
-using DTC.Application.Interfaces.Repo;
-using DTC.Application.Interfaces;
-using DTC.Application.AutoMapper.Mappings;
-using DTC.API.Middleware;
-using Serilog;
-using DTC.Application.Interfaces.RabbitMQ;
-using DTC.Infrastructure.Services.RabbitMQ;
 using Minio;
+using Serilog;
+using System.Text;
 
 namespace DTC.API
 {
@@ -50,17 +51,8 @@ namespace DTC.API
             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
             builder.Services.AddScoped<IRabbitMqPublisher, RabbitMqPublisher>();
             builder.Services.Configure<RabbitMqOptions>(builder.Configuration.GetSection("RabbitMq"));
+            builder.Services.AddStorageService(builder.Configuration);
             builder.Services.AddSingleton<IMinioFileService, MinioFileService>();
-            builder.Services.AddSingleton<IMinioClient>(sp =>
-            {
-                var config = builder.Configuration.GetSection("Minio");
-
-                return new MinioClient()
-                    .WithEndpoint(config["Endpoint"])     
-                    .WithCredentials(config["AccessKey"], config["SecretKey"])
-                    .WithSSL(false)                        
-                    .Build();
-            });
             builder.Services.AddAutoMapper(config =>
             {
                 config.AddProfile<MappingProfile>();
@@ -165,16 +157,14 @@ namespace DTC.API
                 try
                 {
                     var db = services.GetRequiredService<ApplicationDataBaseContext>();
-                    db.Database.Migrate(); // <-- применяем миграции автоматически
-
-                    // Сидируем данные
+                    db.Database.Migrate(); 
                     await SeedData.InitializeAsync(services);
                 }
                 catch (Exception ex)
                 {
                     var logger = services.GetRequiredService<ILogger<Program>>();
                     logger.LogError(ex, "Произошла ошибка при инициализации базы данных.");
-                    throw; // можно пробросить, чтобы контейнер не стартовал с пустой БД
+                    throw;
                 }
             }
 

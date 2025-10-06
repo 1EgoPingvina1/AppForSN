@@ -39,7 +39,7 @@ services:
       - pgadmin_data:/var/lib/pgadmin
 
   rabbitmq:
-    image: rabbitmq:3.10.7-management
+    image: rabbitmq:3.12-management
     container_name: rabbitmq
     hostname: rabbitmq
     restart: unless-stopped
@@ -60,7 +60,7 @@ services:
       retries: 5
 
   minio:
-    image: quay.io/minio/minio:RELEASE.2023-09-20T22-49-55Z
+    image: quay.io/minio/minio:latest
     container_name: minio
     command: server --console-address ":9001" /data
     environment:
@@ -70,15 +70,10 @@ services:
       - minio_data:/data
     ports:
       - "9000:9000"
-      - "9001:9001"
+      - "9090:9090"
     networks:
       - dtc_network
     restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
-      interval: 30s
-      timeout: 20s
-      retries: 5
 
   dtcapi:
     image: dtcapi
@@ -92,16 +87,45 @@ services:
       Minio__SecretKey: "miniopassword"
       Minio__BucketName: "projects"
     depends_on:
-      - postgres
-      - rabbitmq
-      - minio
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
     ports:
       - "8080:8080"
     networks:
       - dtc_network
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
     command: >
-      bash -c "dotnet ef database update && dotnet DTC.API.dll"
+      bash -c "sleep 10 && dotnet ef database update && dotnet DTC.API.dll"
+
+  frontend-dev:
+    image: frontend-dev:latest
+    container_name: frontend
+    ports:
+      - "80:80"
+      - "443:443"
+    networks:
+      - dtc_network
+    volumes:
+      - ./frontend/src:/app/src
+      - ./frontend/angular.json:/app/angular.json
+      - ./frontend/package.json:/app/package.json
+      - ./frontend/tsconfig.json:/app/tsconfig.json
+      - ./frontend/tsconfig.app.json:/app/tsconfig.app.json
+      - ./frontend/tsconfig.spec.json:/app/tsconfig.spec.json
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+    depends_on:
+      - dtcapi
+    restart: unless-stopped
+
 
 volumes:
   postgres_data:

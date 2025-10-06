@@ -41,7 +41,7 @@ namespace DTC.Application.AutoMapper.Mappings
                 .ForMember(dest => dest.Id, opt => opt.Ignore())
                 .ForMember(dest => dest.RegDate, opt => opt.MapFrom(src => DateTime.UtcNow))
                 .ForMember(dest => dest.Members, opt => opt.Ignore())
-                .ForMember(dest => dest.Photo, opt => opt.MapFrom(src => src.Photo ?? "default_photo.jpg"));
+                .ForMember(dest => dest.Photo, opt => opt.Ignore());
 
             CreateMap<AuthorGroup, AuthorGroupResponseDto>();
         }

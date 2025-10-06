@@ -111,7 +111,8 @@ namespace DTC.Infrastructure.Services
 
             return new TokenResponseDTO
             {
-                AccessToken = accessToken
+                AccessToken = accessToken,
+                RefreshToken = newRefreshToken.Token
             };
         }
 
@@ -126,11 +127,11 @@ namespace DTC.Infrastructure.Services
 
             var response = _httpContextAccessor.HttpContext.Response;
 
-            // Настройки для HTTP (без Secure флага)
+           
             response.Cookies.Append("access_token", jwt, new CookieOptions
             {
                 HttpOnly = true,
-                Secure = false, // false для HTTP
+                Secure = false, 
                 SameSite = SameSiteMode.Lax,
                 Expires = DateTime.UtcNow.AddMinutes(15)
             });

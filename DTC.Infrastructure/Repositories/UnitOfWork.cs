@@ -2,6 +2,7 @@
 using DTC.Application.Interfaces;
 using DTC.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore.Storage;
+using DTC.Application.Interfaces.Services;
 
 namespace DTC.Infrastructure.Repositories
 {
@@ -13,6 +14,8 @@ namespace DTC.Infrastructure.Repositories
         public IAuthorGroupRepository AuthorGroupsRepository { get; private set; }
         public IAuthorRepository AuthorsRepository { get; private set; }
         public IProjectRepository ProjectRepository { get; }
+
+        public IAuthService AuthService => throw new NotImplementedException();
 
         public UnitOfWork(ApplicationDataBaseContext context)
         {
