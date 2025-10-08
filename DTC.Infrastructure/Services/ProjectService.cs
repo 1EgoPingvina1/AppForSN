@@ -29,43 +29,54 @@ namespace DTC.Infrastructure.Services
 
         public async Task<ProjectResponseDto> CreateAsync(CreateProjectDTO createDto)
         {
-            var project = _mapper.Map<Project>(createDto);
-
-            var user = _httpContextAccessor.HttpContext?.User;
-            if (user == null)
-                throw new HttpExeption(401, "Токен не действителен");
-
-            var userId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? user.FindFirst("sub")?.Value ?? throw new HttpExeption(401, "Unauthirized");
-            project.CreaterId = int.Parse(userId);
-            project.CreatedAt = DateTime.UtcNow;
-            project.VersionDate = DateTime.UtcNow;
-            project.StatusId = 1;
-
-            if (createDto.PhotoFile != null)
+            await _unitOfWork.BeginTransactionAsync();
+            try
             {
-                using var stream = createDto.PhotoFile.OpenReadStream();
-                string objectName = $"{Guid.NewGuid()}_{createDto.PhotoFile.FileName}";
-                string url = await _minioStorage.UploadFileAsync(stream, objectName, createDto.PhotoFile.ContentType, "project-photos");
-                project.PhotoUrl = url;
-            }
+                var project = _mapper.Map<Project>(createDto);
 
-            if (createDto.Files != null && createDto.Files.Any())
-            {
-                var uploadedFiles = await _minioStorage.UploadProjectFilesAsync(
-                    project.Id,
-                    createDto.Files.ToList(),
-                    "project-files",
-                    isMainFile: false);
+                var user = _httpContextAccessor.HttpContext?.User;
+                if (user == null)
+                    throw new HttpExeption(401, "Токен не действителен");
 
-                foreach (var file in uploadedFiles)
+                var userId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? user.FindFirst("sub")?.Value ?? throw new HttpExeption(401, "Unauthirized");
+                project.CreaterId = int.Parse(userId);
+                project.CreatedAt = DateTime.UtcNow;
+                project.VersionDate = DateTime.UtcNow;
+                project.StatusId = 1;
+
+                if (createDto.PhotoFile != null)
                 {
-                    project.Files ??= new List<ProjectFile>();
-                    project.Files.Add(file);
+                    using var stream = createDto.PhotoFile.OpenReadStream();
+                    string objectName = $"{Guid.NewGuid()}_{createDto.PhotoFile.FileName}";
+                    string url = await _minioStorage.UploadFileAsync(stream, objectName, createDto.PhotoFile.ContentType, "project-photos");
+                    project.PhotoUrl = url;
                 }
-            }
 
-            _unitOfWork.ProjectRepository.Add(project);
-            return _mapper.Map<ProjectResponseDto>(project);
+                if (createDto.Files != null && createDto.Files.Any())
+                {
+                    var uploadedFiles = await _minioStorage.UploadProjectFilesAsync(
+                        project.Id,
+                        createDto.Files.ToList(),
+                        "project-files",
+                        isMainFile: false);
+
+                    foreach (var file in uploadedFiles)
+                    {
+                        project.Files ??= new List<ProjectFile>();
+                        project.Files.Add(file);
+                    }
+                }
+
+                _unitOfWork.ProjectRepository.Add(project);
+
+                await _unitOfWork.CommitTransactionAsync();
+                return _mapper.Map<ProjectResponseDto>(project);
+            }
+            catch
+            {
+                await _unitOfWork.RollbackAsync();
+                throw new HttpExeption(500, "Transaction has been canceled");
+            }
         }
 
         public async Task<ProjectResponseDto?> GetByIdAsync(int id)
@@ -112,6 +123,6 @@ namespace DTC.Infrastructure.Services
 
         public async Task<IEnumerable<ProjectType>> GetProjectTypesAsync() => await _unitOfWork.ProjectRepository.GetProjectTypeAsync();
 
-       
+
     }
 }

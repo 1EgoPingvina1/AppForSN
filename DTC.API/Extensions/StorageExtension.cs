@@ -5,13 +5,12 @@ namespace DTC.API.Extensions
 {
     public static class StorageExtension
     {
-        public static IServiceCollection AddStorageService(this IServiceCollection services,IConfiguration configuration)
+        public static IServiceCollection AddStorageService(this IServiceCollection services)
         {
-            var config = configuration.GetSection("MinIO");
             services.AddMinio(configureClient => configureClient
-                .WithEndpoint("localhost:9000")
-                .WithCredentials(config["AccessKey"], config["SecretKey"])
-                .WithSSL(true)
+                .WithEndpoint("minio:9000")
+                .WithCredentials("minioadmin", "miniopassword")
+                .WithSSL(false)
                 .Build());
             return services;
         }

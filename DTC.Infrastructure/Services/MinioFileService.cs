@@ -11,7 +11,7 @@ namespace DTC.Infrastructure.Services
     {
         private readonly IMinioClient _minioStorage;
         private readonly ILogger<MinioFileService> _logger;
-        public MinioFileService(ILogger<MinioFileService> logger,IMinioClient minio)
+        public MinioFileService(ILogger<MinioFileService> logger, IMinioClient minio)
         {
             _minioStorage = minio;
             _logger = logger;
@@ -37,7 +37,7 @@ namespace DTC.Infrastructure.Services
         public async Task<Stream> GetFileAsync(string fileName, string bucketName)
         {
             var ms = new MemoryStream();
-            await   _minioStorage.GetObjectAsync(new GetObjectArgs()
+            await _minioStorage.GetObjectAsync(new GetObjectArgs()
                 .WithBucket(bucketName)
                 .WithObject(fileName)
                 .WithCallbackStream(stream => stream.CopyTo(ms)));

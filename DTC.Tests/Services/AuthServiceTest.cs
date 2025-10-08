@@ -122,7 +122,7 @@ namespace DTC.Tests
                 Password = "Pass123!"
             });
 
-            Assert.Equal("jwt_token", result.Token);
+            Assert.Equal("jwt_token", result.AccessToken);
             Assert.Equal("refresh_token", result.RefreshToken);
         }
 

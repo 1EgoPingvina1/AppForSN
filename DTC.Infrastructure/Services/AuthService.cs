@@ -96,7 +96,7 @@ namespace DTC.Infrastructure.Services
             response.Cookies.Append("access_token", accessToken, new CookieOptions
             {
                 HttpOnly = true,
-                Secure = false, // false для HTTP
+                Secure = true, // false для HTTP
                 SameSite = SameSiteMode.Lax, // Lax для лучшей совместимости
                 Expires = DateTime.UtcNow.AddMinutes(15)
             });
@@ -104,7 +104,7 @@ namespace DTC.Infrastructure.Services
             response.Cookies.Append("refresh_token", newRefreshToken.Token, new CookieOptions
             {
                 HttpOnly = true,
-                Secure = false, // false для HTTP
+                Secure = true, // false для HTTP
                 SameSite = SameSiteMode.Lax,
                 Expires = newRefreshToken.ExpiresAt
             });
@@ -116,7 +116,7 @@ namespace DTC.Infrastructure.Services
             };
         }
 
-        public async Task<UserDTO> LoginAsync(LoginDTO login)
+        public async Task<TokenResponseDTO> LoginAsync(LoginDTO login)
         {
             var user = await _userManager.FindByNameAsync(login.Username);
             if (user == null || !await _userManager.CheckPasswordAsync(user, login.Password))
@@ -131,22 +131,22 @@ namespace DTC.Infrastructure.Services
             response.Cookies.Append("access_token", jwt, new CookieOptions
             {
                 HttpOnly = true,
-                Secure = false, 
+                Secure = true, 
                 SameSite = SameSiteMode.Lax,
-                Expires = DateTime.UtcNow.AddMinutes(15)
+                Expires = DateTime.UtcNow.AddMinutes(10)
             });
 
             response.Cookies.Append("refresh_token", refreshToken.Token, new CookieOptions
             {
                 HttpOnly = true,
-                Secure = false, // false для HTTP
+                Secure = true, // false для HTTP
                 SameSite = SameSiteMode.Lax,
                 Expires = refreshToken.ExpiresAt
             });
 
-            return new UserDTO
+            return new TokenResponseDTO
             {
-                Token = jwt,
+                AccessToken = jwt,
                 RefreshToken = refreshToken.Token
             };
         }
@@ -172,13 +172,13 @@ namespace DTC.Infrastructure.Services
             // Удаляем куки с теми же настройками, что и при создании
             response.Cookies.Delete("refresh_token", new CookieOptions
             {
-                Secure = false,
+                Secure = true,
                 SameSite = SameSiteMode.Lax
             });
 
             response.Cookies.Delete("access_token", new CookieOptions
             {
-                Secure = false,
+                Secure = true,
                 SameSite = SameSiteMode.Lax
             });
         }

@@ -73,12 +73,11 @@ namespace DTC.Infrastructure.Services
             };
 
             await _context.RefreshTokens.AddAsync(refreshToken);
-
+            await _context.SaveChangesAsync();
             return new RefreshToken
             {
                 Token = rawToken,
-                ExpiresAt = refreshToken.ExpiresAt,
-                UserId = refreshToken.UserId
+                ExpiresAt = refreshToken.ExpiresAt
             };
         }
     }

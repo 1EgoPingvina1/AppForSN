@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DTC.Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDataBaseContext))]
-    [Migration("20250911095011_ChangeProjectModule_1")]
-    partial class ChangeProjectModule_1
+    [Migration("20251008194155_init")]
+    partial class init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -105,8 +105,9 @@ namespace DTC.Infrastructure.Migrations
                     b.Property<int>("AccessFailedCount")
                         .HasColumnType("integer");
 
-                    b.Property<byte[]>("Avatar")
-                        .HasColumnType("bytea");
+                    b.Property<string>("AvatarUrl")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<DateTime?>("BanDate")
                         .HasColumnType("timestamp with time zone");

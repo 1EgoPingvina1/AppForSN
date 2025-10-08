@@ -1,7 +1,6 @@
 using DTC.API.Extensions;
 using DTC.API.Helpers;
 using DTC.API.middleware;
-using DTC.API.Middleware;
 using DTC.Application.AutoMapper.Mappings;
 using DTC.Application.Interfaces;
 using DTC.Application.Interfaces.RabbitMQ;
@@ -51,7 +50,7 @@ namespace DTC.API
             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
             builder.Services.AddScoped<IRabbitMqPublisher, RabbitMqPublisher>();
             builder.Services.Configure<RabbitMqOptions>(builder.Configuration.GetSection("RabbitMq"));
-            builder.Services.AddStorageService(builder.Configuration);
+            builder.Services.AddStorageService();
             builder.Services.AddSingleton<IMinioFileService, MinioFileService>();
             builder.Services.AddAutoMapper(config =>
             {
@@ -119,7 +118,7 @@ namespace DTC.API
             {
                 opt.AddPolicy("AllowSpecificOrigin", policy =>
                 {
-                    policy.WithOrigins("http://localhost:4200")
+                    policy.WithOrigins("https://localhost:4200")
                     .AllowAnyHeader()
                     .AllowAnyMethod()
                     .AllowCredentials();
@@ -134,7 +133,6 @@ namespace DTC.API
             builder.Host.UseSerilog();
             var app = builder.Build();
             app.UseMiddleware<ExceptionHandlingMiddleware>();
-            app.UseMiddleware<TransactionMiddleware>();
             app.UseRouting();
             app.UseCors("AllowSpecificOrigin");
             if (app.Environment.IsDevelopment())

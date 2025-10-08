@@ -70,7 +70,7 @@ services:
       - minio_data:/data
     ports:
       - "9000:9000"
-      - "9090:9090"
+      - "9001:9001"
     networks:
       - dtc_network
     restart: unless-stopped

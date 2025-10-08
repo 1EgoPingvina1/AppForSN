@@ -17,7 +17,7 @@ namespace DTC.Infrastructure.Services
         private readonly IMinioFileService _minioStorage;
 
 
-        public AuthorGroupService(IUnitOfWork unitOfWork, IMapper mapper, ApplicationDataBaseContext dataBaseContext = null, IMinioFileService minioStorage = null)
+        public AuthorGroupService(IUnitOfWork unitOfWork, IMapper mapper, ApplicationDataBaseContext dataBaseContext, IMinioFileService minioStorage)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;

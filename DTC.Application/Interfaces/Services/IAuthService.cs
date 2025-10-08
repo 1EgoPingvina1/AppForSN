@@ -8,7 +8,7 @@ namespace DTC.Application.Interfaces.Services
     public interface IAuthService
     {
         Task<UserDTO> RegisterAsync(RegisterDTO register);
-        Task<UserDTO> LoginAsync(LoginDTO login);
+        Task<TokenResponseDTO> LoginAsync(LoginDTO login);
         Task<UserProfileDTO?> GetUserProfileAsync(int userId);
         Task<User> UpdateProfileAsync(int userId, UpdateProfileDto updateDto);
         Task<string> UploadAvatarAsync(string userId, IFormFile file);

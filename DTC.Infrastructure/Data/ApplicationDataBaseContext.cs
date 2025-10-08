@@ -3,7 +3,6 @@ using DTC.Domain.Entities.Main;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using System.Reflection.Emit;
 
 namespace DTC.Infrastructure.Data
 {
@@ -16,12 +15,18 @@ namespace DTC.Infrastructure.Data
                                                  IdentityRoleClaim<int>,
                                                  IdentityUserToken<int>>
     {
-        //Authorization domain
+
+
+        public ApplicationDataBaseContext(DbContextOptions<ApplicationDataBaseContext> options)
+    : base(options) { }
+
+        public ApplicationDataBaseContext() { }
         public DbSet<RefreshToken> RefreshTokens { get; set; }
 
         /// <summary>
         /// Project / Authors Domain (main)
         /// </summary>
+        /// 
         public DbSet<Project> Projects { get; set; }
         public DbSet<ProjectType> ProjectTypes { get; set; }
         public DbSet<ProjectFile> ProjectFiles { get; set; }
@@ -31,10 +36,7 @@ namespace DTC.Infrastructure.Data
         public DbSet<AuthorGroup> AuthorGroups { get; set; }
         public DbSet<AuthorGroupMember> AuthorGroupsMembers { get; set; }
 
-        public ApplicationDataBaseContext(DbContextOptions<ApplicationDataBaseContext> options)
-            : base(options) { }
-        
-        public ApplicationDataBaseContext() { }
+
 
         protected override void OnModelCreating(ModelBuilder builder)
         {

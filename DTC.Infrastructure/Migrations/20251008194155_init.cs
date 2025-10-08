@@ -40,7 +40,7 @@ namespace DTC.Infrastructure.Migrations
                     LastName = table.Column<string>(type: "text", nullable: false),
                     Gender = table.Column<string>(type: "text", nullable: false),
                     IsAuthor = table.Column<bool>(type: "boolean", nullable: false),
-                    Avatar = table.Column<byte[]>(type: "bytea", nullable: true),
+                    AvatarUrl = table.Column<string>(type: "text", nullable: false),
                     Description = table.Column<string>(type: "text", nullable: true),
                     Birthday = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
@@ -64,23 +64,6 @@ namespace DTC.Infrastructure.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_AspNetUsers", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "AuthorGroups",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Name = table.Column<string>(type: "text", nullable: false),
-                    Photo = table.Column<string>(type: "text", nullable: false),
-                    Description = table.Column<string>(type: "text", nullable: false),
-                    RegDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    RegUser_ID = table.Column<int>(type: "integer", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_AuthorGroups", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -216,11 +199,37 @@ namespace DTC.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "AuthorGroups",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Name = table.Column<string>(type: "text", nullable: false),
+                    Photo = table.Column<string>(type: "text", nullable: true),
+                    Description = table.Column<string>(type: "text", nullable: true),
+                    RegDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    RegUserId = table.Column<int>(type: "integer", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AuthorGroups", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_AuthorGroups_AspNetUsers_RegUserId",
+                        column: x => x.RegUserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Authors",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    FirstName = table.Column<string>(type: "text", nullable: false),
+                    SecondName = table.Column<string>(type: "text", nullable: true),
+                    LastName = table.Column<string>(type: "text", nullable: false),
                     Description = table.Column<string>(type: "text", nullable: true),
                     RegDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     UserId = table.Column<int>(type: "integer", nullable: false)
@@ -267,12 +276,15 @@ namespace DTC.Infrastructure.Migrations
                     Version = table.Column<string>(type: "text", nullable: false),
                     VersionDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     Description = table.Column<string>(type: "text", nullable: false),
-                    PhotoUrl = table.Column<string>(type: "text", nullable: false),
+                    IsOpenSource = table.Column<bool>(type: "boolean", nullable: false),
+                    PhotoUrl = table.Column<string>(type: "text", nullable: true),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     CreaterId = table.Column<int>(type: "integer", nullable: false),
+                    AuthorGroupId = table.Column<int>(type: "integer", nullable: false),
                     StatusId = table.Column<int>(type: "integer", nullable: false),
                     ProjectTypeId = table.Column<int>(type: "integer", nullable: false),
-                    AuthorGroupId = table.Column<int>(type: "integer", nullable: false)
+                    BeginAge = table.Column<int>(type: "integer", nullable: false),
+                    EndAge = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -336,7 +348,7 @@ namespace DTC.Infrastructure.Migrations
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     FileName = table.Column<string>(type: "text", nullable: false),
-                    StoragePath = table.Column<string>(type: "text", nullable: false),
+                    Backet = table.Column<string>(type: "text", nullable: false),
                     OriginalName = table.Column<string>(type: "text", nullable: false),
                     Size = table.Column<long>(type: "bigint", nullable: false),
                     ContentType = table.Column<string>(type: "text", nullable: false),
@@ -402,6 +414,11 @@ namespace DTC.Infrastructure.Migrations
                 table: "AspNetUsers",
                 column: "NormalizedUserName",
                 unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AuthorGroups_RegUserId",
+                table: "AuthorGroups",
+                column: "RegUserId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_AuthorGroupsMembers_AuthorGroup_ID",
@@ -481,9 +498,6 @@ namespace DTC.Infrastructure.Migrations
                 name: "Projects");
 
             migrationBuilder.DropTable(
-                name: "AspNetUsers");
-
-            migrationBuilder.DropTable(
                 name: "AuthorGroups");
 
             migrationBuilder.DropTable(
@@ -491,6 +505,9 @@ namespace DTC.Infrastructure.Migrations
 
             migrationBuilder.DropTable(
                 name: "Statuses");
+
+            migrationBuilder.DropTable(
+                name: "AspNetUsers");
         }
     }
 }
