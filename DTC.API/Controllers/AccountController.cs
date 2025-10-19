@@ -1,8 +1,8 @@
 ﻿using DTC.Application.DTO.Account;
-using DTC.Application.DTO.Profile;
 using DTC.Application.Interfaces.Services;
+using DTC.Application.Interfaces.Services.TwoFactoryAuth;
 using DTC.Domain.Entities.Identity;
-using DTC.Infrastructure.Services;
+using DTC.Domain.Entities.Identity.TwoFactor;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -16,11 +16,13 @@ namespace DTC.API.Controllers
     {
         private readonly IAuthService _authService;
         private readonly UserManager<User> _userManager;
+        private readonly ITwoFactoryAuthorization _TwoFactoryAuthorization;
 
-        public AccountController(IAuthService authService, UserManager<User> userManager)
+        public AccountController(IAuthService authService, UserManager<User> userManager, ITwoFactoryAuthorization twoFactoryAuthorization)
         {
             _authService = authService;
             _userManager = userManager;
+            _TwoFactoryAuthorization = twoFactoryAuthorization;
         }
         [HttpPost("login")]
         public async Task<ActionResult<UserDTO>> Login(LoginDTO login) => Ok(await _authService.LoginAsync(login));
@@ -76,6 +78,71 @@ namespace DTC.API.Controllers
         {
             await _authService.ConfirmEmailAsync(userId, token);
             return Ok(new { message = "Email confirmed." });
+        }
+
+        [HttpGet("2FA/status")]
+        [Authorize]
+        public async Task<IActionResult> TwoAuthorizationStatus() => Ok(await _TwoFactoryAuthorization.GetStatus());
+
+        [HttpGet("2FA/setup")]
+        [Authorize]
+        public async Task<ActionResult<TwoFactorSetupResponse>> GenerateSetup()
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                return NotFound(new TwoFactorSetupResponse
+                {
+                    Success = false,
+                    ErrorMessage = "User not found"
+                });
+            }
+
+            if (await _userManager.GetTwoFactorEnabledAsync(user))
+            {
+                return BadRequest(new TwoFactorSetupResponse
+                {
+                    Success = false,
+                    ErrorMessage = "2FA is already enabled"
+                });
+            }
+
+            var userEmail = await _userManager.GetEmailAsync(user) ?? user.UserName!;
+            var issuer = "Dtc-app";
+
+            var (secret, otpAuthUri) = await _TwoFactoryAuthorization.GenerateSecretAsync(userEmail, issuer);
+
+            var recoveryCodes = await _TwoFactoryAuthorization.GenerateRecoveryCodesAsync(10);
+
+            var response = new TwoFactorSetupResponse
+            {
+                Success = true,
+                Secret = secret,
+                OtpAuthUri = otpAuthUri,
+                RecoveryCodes = recoveryCodes,
+                ManualEntryKey = secret
+            };
+
+            return Ok(response);
+
+        }
+
+        [HttpPost("2FA/enable")]
+        [Authorize]
+        public async Task<ActionResult<TwoFactorVerifyResponse>> EnableTwoFactory([FromBody] TwoFactorVerifyRequest request)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+                return NotFound(new TwoFactorVerifyResponse { Success = false, Message = "User not found" });
+
+            var isValid = _TwoFactoryAuthorization.VerifyCodeAsync(request.Secret, request.Code);
+            if (!isValid)
+                return BadRequest(new TwoFactorVerifyResponse { Success = false, Message = "Invalid 2FA code" });
+
+            var recoveryCodes = await _TwoFactoryAuthorization.GenerateRecoveryCodesAsync(10);
+            await _TwoFactoryAuthorization.EnableTwoFactorAsync(user, request.Secret, recoveryCodes);
+
+            return Ok(new TwoFactorVerifyResponse { Success = true, Message = "2FA enabled successfully" });
         }
     }
 }

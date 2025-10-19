@@ -17,9 +17,7 @@ namespace DTC.Infrastructure.Services
         private readonly ApplicationDataBaseContext _context;
         private readonly UserManager<User> _userManager;
         private readonly ITokenService _tokenService;
-        private readonly SignInManager<User> _signInManager;
         private readonly IEmailService _emailService;
-        private readonly IConfiguration _configuration;
         private readonly IHttpContextAccessor _httpContextAccessor;
 
         public AuthService(
@@ -32,13 +30,11 @@ namespace DTC.Infrastructure.Services
         {
             _context = context;
             _userManager = userManager;
-            _signInManager = signInManager;
             _tokenService = tokenService;
-            _configuration = configuration;
             _httpContextAccessor = httpContextAccessor;
         }
 
-        public async Task<UserDTO> RegisterAsync(RegisterDTO registerDTO)
+        public async Task<TokenResponseDTO> RegisterAsync(RegisterDTO registerDTO)
         {
             var user = new User
             {
@@ -59,11 +55,16 @@ namespace DTC.Infrastructure.Services
             if (!roleResult.Succeeded)
                 throw new HttpExeption(422, "Ошибка при назначении роли пользователю");
 
-            return new UserDTO
+            var accessToken = await _tokenService.GenerateJwtToken(user);
+
+            var refreshToken = await _tokenService.GenerateRefreshToken(user);
+
+            SetCookieTokens(accessToken, refreshToken.Token);
+
+            return new TokenResponseDTO
             {
-                Username = user.UserName,
-                Token = await _tokenService.GenerateJwtToken(user),
-                RefreshToken = (await _tokenService.GenerateRefreshToken(user)).Token
+                AccessToken = accessToken,
+                RefreshToken = refreshToken.Token
             };
         }
 
@@ -90,24 +91,7 @@ namespace DTC.Infrastructure.Services
             _context.RefreshTokens.Remove(token);
             await _context.SaveChangesAsync();
 
-            var response = _httpContextAccessor.HttpContext.Response;
-
-            // Настройки для HTTP (без Secure флага)
-            response.Cookies.Append("access_token", accessToken, new CookieOptions
-            {
-                HttpOnly = true,
-                Secure = true, // false для HTTP
-                SameSite = SameSiteMode.Lax, // Lax для лучшей совместимости
-                Expires = DateTime.UtcNow.AddMinutes(15)
-            });
-
-            response.Cookies.Append("refresh_token", newRefreshToken.Token, new CookieOptions
-            {
-                HttpOnly = true,
-                Secure = true, // false для HTTP
-                SameSite = SameSiteMode.Lax,
-                Expires = newRefreshToken.ExpiresAt
-            });
+            SetCookieTokens(accessToken, newRefreshToken.Token);
 
             return new TokenResponseDTO
             {
@@ -125,24 +109,7 @@ namespace DTC.Infrastructure.Services
             var jwt = await _tokenService.GenerateJwtToken(user);
             var refreshToken = await _tokenService.GenerateRefreshToken(user);
 
-            var response = _httpContextAccessor.HttpContext.Response;
-
-           
-            response.Cookies.Append("access_token", jwt, new CookieOptions
-            {
-                HttpOnly = true,
-                Secure = true, 
-                SameSite = SameSiteMode.Lax,
-                Expires = DateTime.UtcNow.AddMinutes(10)
-            });
-
-            response.Cookies.Append("refresh_token", refreshToken.Token, new CookieOptions
-            {
-                HttpOnly = true,
-                Secure = true, // false для HTTP
-                SameSite = SameSiteMode.Lax,
-                Expires = refreshToken.ExpiresAt
-            });
+            SetCookieTokens(jwt,refreshToken.Token);
 
             return new TokenResponseDTO
             {
@@ -167,20 +134,8 @@ namespace DTC.Infrastructure.Services
                 await _context.SaveChangesAsync();
             }
 
-            var response = _httpContextAccessor.HttpContext.Response;
-
-            // Удаляем куки с теми же настройками, что и при создании
-            response.Cookies.Delete("refresh_token", new CookieOptions
-            {
-                Secure = true,
-                SameSite = SameSiteMode.Lax
-            });
-
-            response.Cookies.Delete("access_token", new CookieOptions
-            {
-                Secure = true,
-                SameSite = SameSiteMode.Lax
-            });
+            DeleteCookies();
+            
         }
 
         public async Task RequestPasswordResetAsync(string email)
@@ -251,9 +206,43 @@ namespace DTC.Infrastructure.Services
             return user;
         }
 
-        public Task<string> UploadAvatarAsync(string userId, IFormFile file)
+        private void SetCookieTokens(string accessToken,string refreshToken)
         {
-            throw new NotImplementedException();
+            var response = _httpContextAccessor.HttpContext.Response;
+
+
+            response.Cookies.Append("access_token", accessToken, new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = true,
+                SameSite = SameSiteMode.Lax,
+                Expires = DateTime.UtcNow.AddMinutes(10)
+            });
+
+            response.Cookies.Append("refresh_token", refreshToken, new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = true,
+                SameSite = SameSiteMode.Lax,
+                Expires = DateTime.UtcNow.AddMinutes(30)
+            });
+        }
+
+        private void DeleteCookies()
+        {
+            var response = _httpContextAccessor.HttpContext.Response;
+
+            response.Cookies.Delete("refresh_token", new CookieOptions
+            {
+                Secure = true,
+                SameSite = SameSiteMode.Lax
+            });
+
+            response.Cookies.Delete("access_token", new CookieOptions
+            {
+                Secure = true,
+                SameSite = SameSiteMode.Lax
+            });
         }
     }
 }

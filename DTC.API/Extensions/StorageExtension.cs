@@ -8,7 +8,7 @@ namespace DTC.API.Extensions
         public static IServiceCollection AddStorageService(this IServiceCollection services)
         {
             services.AddMinio(configureClient => configureClient
-                .WithEndpoint("minio:9000")
+                .WithEndpoint("localhost:9000")
                 .WithCredentials("minioadmin", "miniopassword")
                 .WithSSL(false)
                 .Build());

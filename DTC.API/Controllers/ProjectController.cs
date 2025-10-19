@@ -45,7 +45,6 @@ namespace DTC.API.Controllers
         }
 
         [HttpPut("{id}")]
-        [Authorize(Roles = "Author")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -63,7 +62,6 @@ namespace DTC.API.Controllers
         }
 
         [HttpDelete("{id}")]
-        [Authorize(Roles = "Author")]
         public async Task<IActionResult> Delete(int id)
         {
             await _projectService.DeleteAsync(id);
@@ -80,7 +78,7 @@ namespace DTC.API.Controllers
         public async Task<IEnumerable<AuthorGroup>> GetAllAuthors() => await _dataBaseContext.AuthorGroups.ToListAsync();
 
         [HttpPost("{id}/review")]
-        [Authorize(Roles = "Author")]
+        [Authorize(Roles = "Reviewer")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]

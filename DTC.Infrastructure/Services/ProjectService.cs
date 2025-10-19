@@ -6,6 +6,7 @@ using DTC.Application.Interfaces.RabbitMQ;
 using DTC.Application.Interfaces.Services;
 using DTC.Domain.Entities.Main;
 using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 
 namespace DTC.Infrastructure.Services
@@ -90,13 +91,20 @@ namespace DTC.Infrastructure.Services
         public async Task UpdateAsync(int id, UpdateProjectDTO updateDto)
         {
             var projectEntity = await _unitOfWork.ProjectRepository.GetByIdAsync(id);
+            Console.WriteLine($"Project found: {projectEntity != null}");
+
             if (projectEntity == null)
-            {
                 throw new KeyNotFoundException($"Project with ID {id} not found.");
-            }
+
+            Console.WriteLine($"Before - Name: {projectEntity.Name}, Description: {projectEntity.Description}");
 
             _mapper.Map(updateDto, projectEntity);
-            _unitOfWork.ProjectRepository.Update(projectEntity);
+
+            Console.WriteLine($"After - Name: {projectEntity.Name}, Description: {projectEntity.Description}");
+
+            await _unitOfWork.SaveChangesAsync();
+
+            Console.WriteLine("Save completed");
         }
 
         public async Task DeleteAsync(int projectId)

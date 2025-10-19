@@ -6,6 +6,7 @@ using DTC.Application.Interfaces;
 using DTC.Application.Interfaces.RabbitMQ;
 using DTC.Application.Interfaces.Repo;
 using DTC.Application.Interfaces.Services;
+using DTC.Application.Interfaces.Services.TwoFactoryAuth;
 using DTC.Domain;
 using DTC.Domain.Entities.Identity;
 using DTC.Infrastructure.Data;
@@ -15,8 +16,6 @@ using DTC.Infrastructure.Services.RabbitMQ;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.OpenApi.Models;
-using Minio;
 using Serilog;
 using System.Text;
 
@@ -27,8 +26,6 @@ namespace DTC.API
         public static async Task Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
-
-            // Add services to the container.
 
             builder.Services.AddControllers();
             builder.Services.AddDbContext<ApplicationDataBaseContext>(options =>
@@ -48,6 +45,7 @@ namespace DTC.API
             builder.Services.AddScoped<IEmailService, SmtpEmailService>();
             builder.Services.AddScoped<IAuthorGroupService, AuthorGroupService>();
             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+            builder.Services.AddScoped<ITwoFactoryAuthorization,TwoFactoryAuthorization>();
             builder.Services.AddScoped<IRabbitMqPublisher, RabbitMqPublisher>();
             builder.Services.Configure<RabbitMqOptions>(builder.Configuration.GetSection("RabbitMq"));
             builder.Services.AddStorageService();
@@ -57,33 +55,7 @@ namespace DTC.API
                 config.AddProfile<MappingProfile>();
             });
             builder.Services.AddDomainServices();
-            builder.Services.AddSwaggerGen(options =>
-            {
-                options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
-                {
-                    Description = "JWT авторизация. Пример: Bearer {токен}",
-                    Name = "Authorization",
-                    In = ParameterLocation.Header,
-                    Type = SecuritySchemeType.Http,
-                    Scheme = "Bearer"
-                });
-
-                options.AddSecurityRequirement(new OpenApiSecurityRequirement
-                {
-                {
-                    new OpenApiSecurityScheme
-                    {
-                        Reference = new OpenApiReference
-                    {
-                    Type = ReferenceType.SecurityScheme,
-                    Id = "Bearer"
-                }
-            },
-            new string[] {}
-            }
-                });
-            });
-
+            builder.Services.AddSwaggerGen();
             builder.Services.AddAuthentication(options =>
             {
                 options.DefaultAuthenticateScheme = "Bearer";

@@ -16,6 +16,11 @@ namespace DTC.Domain.Entities.Identity
         public DateTime? BlockDate { get; set; }
         public DateTime? BanDate { get; set; }
         public ICollection<RefreshToken> RefreshTokens { get; set; } 
-        public ICollection<AppUserRole> UserRoles { get; set; } 
+        public ICollection<AppUserRole> UserRoles { get; set; }
+
+        //2FA
+        public string? TwoFactorSecret { get; set; }
+        public string? RecoveryCodes { get; set; } 
+        public DateTime? TwoFactorCreatedAt { get; set; }
     }
 }

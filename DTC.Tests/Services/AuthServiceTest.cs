@@ -81,7 +81,7 @@ namespace DTC.Tests
 
             var result = await service.RegisterAsync(dto);
 
-            Assert.Equal("jwt_token", result.Token);
+            Assert.Equal("jwt_token", result.AccessToken);
             Assert.Equal("refresh_token", result.RefreshToken);
         }
 
@@ -310,15 +310,6 @@ namespace DTC.Tests
 
             Assert.Equal("New", updated.FirstName);
             Assert.Equal("Surname", updated.LastName);
-        }
-
-        // --- UploadAvatarAsync ---
-        [Fact]
-        public async Task UploadAvatarAsync_ShouldThrowNotImplemented()
-        {
-            var service = CreateService();
-            await Assert.ThrowsAsync<NotImplementedException>(() =>
-                service.UploadAvatarAsync("id", null));
         }
 
         // Helper: Mock UserManager
