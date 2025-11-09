@@ -1,0 +1,137 @@
+<div class="container">
+  <div class="header">
+    <h1>Создание нового проекта</h1>
+    <p>Заполните форму для создания нового проекта</p>
+  </div>
+
+  <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+    <!-- Основная информация -->
+    <div class="form-section">
+      <h3><span class="material-icons">info</span> Основная информация</h3>
+      <div class="form-grid">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Название проекта</mat-label>
+          <input matInput formControlName="name" placeholder="Введите название" maxlength="200">
+          <mat-hint align="end">{{ form.get('name')?.value?.length || 0 }} / 200</mat-hint>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Версия</mat-label>
+          <input matInput formControlName="version" placeholder="Например: 1.0.0" maxlength="50">
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Дата версии</mat-label>
+          <input matInput formControlName="versionDate" [matDatepicker]="picker">
+          <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+          <mat-datepicker #picker></mat-datepicker>
+        </mat-form-field>
+      </div>
+    </div>
+
+    <!-- Описание -->
+    <div class="form-section">
+      <h3><span class="material-icons">description</span> Описание</h3>
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Описание проекта</mat-label>
+        <textarea matInput formControlName="description" placeholder="Опишите ваш проект" rows="4"
+          maxlength="1000"></textarea>
+        <mat-hint align="end">{{ form.get('description')?.value?.length || 0 }} / 1000</mat-hint>
+      </mat-form-field>
+    </div>
+
+    <div class="form-section">
+      <h3><span class="material-icons">person</span> Возрастные ограничения</h3>
+      <div class="form-grid">
+        <mat-form-field appearance="outline">
+          <mat-label>Минимальный возраст</mat-label>
+          <input matInput type="number" formControlName="beginAge">
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Максимальный возраст</mat-label>
+          <input matInput type="number" formControlName="endAge">
+        </mat-form-field>
+      </div>
+    </div>
+
+    <!-- Обложка проекта -->
+    <div class="form-section">
+      <h3><span class="material-icons">image</span> Обложка проекта</h3>
+      <div class="file-drop-area" (drop)="onCoverDrop($event)" (dragover)="onDragOver($event)"
+        (dragleave)="onDragLeave($event)" [class.drag-over]="isDraggingOverCover">
+        <p>Перетащите изображение сюда или</p>
+        <button mat-raised-button color="primary" type="button" (click)="coverInput.click()">
+          <mat-icon>cloud_upload</mat-icon>
+          Выбрать файл
+        </button>
+        <input #coverInput type="file" accept="image/*" hidden (change)="onCoverChange($event)">
+      </div>
+
+      <div class="file-list" *ngIf="coverFile">
+        <div class="file-item">
+          <div class="file-info">
+            {{ coverFile.name }} ({{ coverFile.size / 1024 | number:'1.0-0' }} KB)
+          </div>
+          <mat-icon class="remove-file" (click)="removeCover()">delete</mat-icon>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-section">
+      <h3><span class="material-icons">category</span> Тип проекта</h3>
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Тип проекта</mat-label>
+        <mat-select formControlName="projectTypeId">
+          <mat-option *ngFor="let type of types" [value]="type.id">
+            {{ type.name }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+
+       <h3><span class="material-icons">groups</span> Группа авторов</h3>
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Группа авторов</mat-label>
+        <mat-select formControlName="authorGroupId">
+          <mat-option *ngFor="let author of authors" [value]="author.id">
+            {{ author.name }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+
+    <!-- Файлы проекта -->
+    <div class="form-section">
+      <h3><span class="material-icons">attachment</span> Файлы проекта</h3>
+      <div class="file-drop-area" (drop)="onFileDrop($event)" (dragover)="onDragOver($event)"
+        (dragleave)="onDragLeave($event)" [class.drag-over]="isDraggingOverFiles">
+        <p>Перетащите файлы сюда или</p>
+        <button mat-raised-button color="primary" type="button" (click)="fileInput.click()">
+          <mat-icon>cloud_upload</mat-icon>
+          Выбрать файлы
+        </button>
+        <input #fileInput type="file" multiple hidden (change)="onFileChange($event)">
+      </div>
+
+      <div class="file-list" *ngIf="selectedFiles.length > 0">
+        <div class="file-item" *ngFor="let file of selectedFiles; let i = index">
+          <div class="file-info">
+            {{ file.name }} ({{ file.size / 1024 | number:'1.0-0' }} KB)
+          </div>
+          <mat-icon class="remove-file" (click)="removeFile(i)">delete</mat-icon>
+        </div>
+      </div>
+    </div>
+    
+    <div class="actions">
+      <button mat-button type="button">
+        <mat-icon>cancel</mat-icon>
+        Отмена
+      </button>
+      <button mat-button="filled" type="submit" [disabled]="form.invalid">
+        <mat-icon>add</mat-icon>
+        Отправить на проверку
+      </button>
+    </div>
+  </form>
+</div>

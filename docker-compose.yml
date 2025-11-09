@@ -75,56 +75,56 @@ services:
       - dtc_network
     restart: unless-stopped
 
-  dtcapi:
-    image: dtcapi
-    container_name: dtcapi
-    environment:
-      DOTNET_ENVIRONMENT: Production
-      ConnectionStrings__DefaultConnection: "Host=postgres;Port=5432;Database=dtc;Username=postgres;Password=postgres"
-      RabbitMQ__HostName: "rabbitmq"
-      Minio__Endpoint: "http://minio:9000"
-      Minio__AccessKey: "minioadmin"
-      Minio__SecretKey: "miniopassword"
-      Minio__BucketName: "projects"
-    depends_on:
-      postgres:
-        condition: service_healthy
-      rabbitmq:
-        condition: service_healthy
-    ports:
-      - "8080:8080"
-    networks:
-      - dtc_network
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
-    command: >
-      bash -c "sleep 10 && dotnet ef database update && dotnet DTC.API.dll"
+  # dtcapi:
+  #   image: dtcapi
+  #   container_name: dtcapi
+  #   environment:
+  #     DOTNET_ENVIRONMENT: Production
+  #     ConnectionStrings__DefaultConnection: "Host=postgres;Port=5432;Database=dtc;Username=postgres;Password=postgres"
+  #     RabbitMQ__HostName: "rabbitmq"
+  #     Minio__Endpoint: "http://minio:9000"
+  #     Minio__AccessKey: "minioadmin"
+  #     Minio__SecretKey: "miniopassword"
+  #     Minio__BucketName: "projects"
+  #   depends_on:
+  #     postgres:
+  #       condition: service_healthy
+  #     rabbitmq:
+  #       condition: service_healthy
+  #   ports:
+  #     - "8080:8080"
+  #   networks:
+  #     - dtc_network
+  #   restart: unless-stopped
+  #   healthcheck:
+  #     test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/health"]
+  #     interval: 30s
+  #     timeout: 10s
+  #     retries: 3
+  #     start_period: 40s
+  #   command: >
+  #     bash -c "sleep 10 && dotnet ef database update && dotnet DTC.API.dll"
 
-  frontend-dev:
-    image: frontend-dev:latest
-    container_name: frontend
-    ports:
-      - "80:80"
-      - "443:443"
-    networks:
-      - dtc_network
-    volumes:
-      - ./frontend/src:/app/src
-      - ./frontend/angular.json:/app/angular.json
-      - ./frontend/package.json:/app/package.json
-      - ./frontend/tsconfig.json:/app/tsconfig.json
-      - ./frontend/tsconfig.app.json:/app/tsconfig.app.json
-      - ./frontend/tsconfig.spec.json:/app/tsconfig.spec.json
-    environment:
-      - CHOKIDAR_USEPOLLING=true
-    depends_on:
-      - dtcapi
-    restart: unless-stopped
+  # frontend-dev:
+  #   image: frontend-dev:latest
+  #   container_name: frontend
+  #   ports:
+  #     - "80:80"
+  #     - "443:443"
+  #   networks:
+  #     - dtc_network
+  #   volumes:
+  #     - ./frontend/src:/app/src
+  #     - ./frontend/angular.json:/app/angular.json
+  #     - ./frontend/package.json:/app/package.json
+  #     - ./frontend/tsconfig.json:/app/tsconfig.json
+  #     - ./frontend/tsconfig.app.json:/app/tsconfig.app.json
+  #     - ./frontend/tsconfig.spec.json:/app/tsconfig.spec.json
+  #   environment:
+  #     - CHOKIDAR_USEPOLLING=true
+  #   depends_on:
+  #     - dtcapi
+  #   restart: unless-stopped
 
 
 volumes:

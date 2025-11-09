@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using OtpNet;
-using QRCoder;
+
 using System.Security.Claims;
 
 namespace DTC.Infrastructure.Services

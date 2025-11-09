@@ -69,7 +69,7 @@ namespace DTC.API.Controllers
         }
 
         [HttpGet("user-projects")]
-        public async Task<IEnumerable<Project>> GetUserProjects([FromQuery] int userId) => await _dataBaseContext.Projects.Where(p => p.CreaterId == userId).ToListAsync();
+        public async Task<IEnumerable<Project>> GetUserProjects([FromQuery] int userId) => await _dataBaseContext.Projects.Include(s => s.Status).Where(p => p.CreaterId == userId).ToListAsync();
 
         [HttpGet("project-types")]
         public async Task<IEnumerable<ProjectType>> GetProjectTypes() => await _projectService.GetProjectTypesAsync();

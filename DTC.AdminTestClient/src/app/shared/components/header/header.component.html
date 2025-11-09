@@ -1,0 +1,84 @@
+<header [class.scrolled]="isScrolled" [class.mobile-open]="isMobileMenuOpen">
+  <div class="header-container">
+    
+    <!-- Логотип -->
+    <div class="logo">
+      <a routerLink="/" class="logo-link">
+        <div class="logo-icon">🚀</div>
+        <span class="logo-text">DTC Social Network</span>
+      </a>
+    </div>
+
+    <nav class="desktop-nav">
+      <ul class="nav-list">
+            <li class="nav-item">
+          <a 
+            routerLink='/about-us' 
+            routerLinkActive="active" 
+            [routerLinkActiveOptions]="{exact: true}"
+            class="nav-link"
+          >
+            <span class="nav-icon">🏠</span>
+            Guide
+          </a>
+        </li>
+            
+        <li class="nav-item">
+          <a 
+            routerLink='/constacts' 
+            routerLinkActive="active" 
+            [routerLinkActiveOptions]="{exact: true}"
+            class="nav-link">
+            <span class="nav-icon">⚡</span>
+            News
+          </a>
+        </li>
+      </ul>
+    </nav>
+
+    <div class="header-actions">
+      <a *ngIf="!(accountService.currentUser$ | async)" routerLink="/login" class="cta-button">
+        Войти
+      </a>
+
+      <a *ngIf="(accountService.currentUser$ | async)" routerLink="/my-account" class="cta-button">
+        Личный кабинет
+      </a>
+
+    </div>
+    <button 
+      class="mobile-menu-toggle"
+      (click)="toggleMobileMenu()"
+      aria-label="Открыть меню">
+
+      <span class="hamburger-line"></span>
+      <span class="hamburger-line"></span>
+      <span class="hamburger-line"></span>
+    </button>
+  </div>
+
+  <!-- Мобильное меню -->
+  <div class="mobile-menu" [class.open]="isMobileMenuOpen">
+    <div class="mobile-menu-content">
+      <div class="mobile-menu-header">
+        <div class="logo">
+          <a routerLink="/" class="logo-link" (click)="closeMobileMenu()">
+            <div class="logo-icon">🚀</div>
+            <span class="logo-text">DTC</span>
+          </a>
+        </div>
+        <button class="close-menu" (click)="closeMobileMenu()">×</button>
+      </div>
+      <div class="mobile-actions">
+        <a routerLink="/login" class="cta-button mobile-cta">
+          Начать проект
+        </a>
+      </div>
+    </div>
+  </div>
+  <div
+    class="mobile-overlay" 
+    [class.active]="isMobileMenuOpen"
+    (click)="closeMobileMenu()"
+  ></div>
+</header>
