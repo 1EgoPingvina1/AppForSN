@@ -1,5 +1,4 @@
-﻿using DTC.Application.DTO;
-using DTC.Application.Interfaces.Repo;
+﻿using DTC.Application.Interfaces.Repo;
 using DTC.Domain.Entities.Main;
 using DTC.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
@@ -20,6 +19,8 @@ namespace DTC.Infrastructure.Repositories
             return await _context.Projects.FindAsync(id);
         }
 
+        public async Task<IEnumerable<ProjectType>> GetProjectTypeAsync() => await _context.ProjectTypes.ToListAsync();
+
         public void Add(Project project)
         {
             _context.Projects.Add(project);
@@ -34,5 +35,7 @@ namespace DTC.Infrastructure.Repositories
         {
             _context.Projects.Remove(project);
         }
+
+        public async Task<IEnumerable<Project?>> GetAllAsync() => await _context.Projects.ToListAsync();
     }
 }

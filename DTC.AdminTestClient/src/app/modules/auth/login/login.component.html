@@ -1,0 +1,281 @@
+<div class="auth-container">
+  <div class="auth-card">
+    <!-- Логотип -->
+    <div class="auth-header">
+      <div class="logo">
+        <span class="logo-icon">🔐</span>
+        <span class="logo-text">Digital Technology Company</span>
+      </div>
+      <h1 class="auth-title">{{ isLoginMode ? 'Вход в систему' : 'Создать аккаунт' }}</h1>
+      <p class="auth-subtitle">
+        {{ isLoginMode ? 'Введите ваши данные для входа' : 'Заполните форму для регистрации' }}
+      </p>
+    </div>
+
+    <form class="auth-form" (ngSubmit)="onSubmit()" #authForm="ngForm">
+      <div *ngIf="isLoginMode">
+        <div class="form-group">
+          <label for="username">Имя пользователя</label>
+          <input
+            type="text"
+            id="username"
+            name="username"
+            [(ngModel)]="model.username"
+            required
+            minlength="3"
+            placeholder="Введите имя пользователя"
+            #usernameInput="ngModel"
+            class="form-input"
+            [class.invalid]="usernameInput.invalid && usernameInput.touched"
+          >
+          <span class="input-icon">👤</span>
+          <div class="error-message" *ngIf="usernameInput.invalid && usernameInput.touched">
+            <span *ngIf="usernameInput.errors?.['required']">Имя пользователя обязательно</span>
+            <span *ngIf="usernameInput.errors?.['minlength']">Минимум 3 символа</span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="password">Пароль</label>
+          <input
+            type="password"
+            id="password"
+            name="password"
+            [(ngModel)]="model.password"
+            required
+            minlength="6"
+            #passwordInput="ngModel"
+            placeholder="Введите пароль"
+            class="form-input"
+            [class.invalid]="passwordInput.invalid && passwordInput.touched"
+          >
+          <span class="input-icon">🔒</span>
+          <div class="error-message" *ngIf="passwordInput.invalid && passwordInput.touched">
+            <span *ngIf="passwordInput.errors?.['required']">Пароль обязателен</span>
+            <span *ngIf="passwordInput.errors?.['minlength']">Минимум 6 символов</span>
+          </div>
+        </div>
+      </div>
+
+      <div *ngIf="!isLoginMode">
+        <div class="form-group">
+          <label for="lastName">Фамилия</label>
+          <input
+            type="text"
+            id="lastName"
+            name="lastName"
+            [(ngModel)]="model.lastName"
+            required
+            placeholder="Введите фамилию"
+            #lastNameInput="ngModel"
+            class="form-input"
+            [class.invalid]="lastNameInput.invalid && lastNameInput.touched"
+          >
+          <span class="input-icon">👤</span>
+          <div class="error-message" *ngIf="lastNameInput.invalid && lastNameInput.touched">
+            Фамилия обязательна
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="firstName">Имя</label>
+          <input
+            type="text"
+            id="firstName"
+            name="firstName"
+            [(ngModel)]="model.firstName"
+            required
+            placeholder="Введите имя"
+            #firstNameInput="ngModel"
+            class="form-input"
+            [class.invalid]="firstNameInput.invalid && firstNameInput.touched"
+          >
+          <span class="input-icon">👤</span>
+          <div class="error-message" *ngIf="firstNameInput.invalid && firstNameInput.touched">
+            Имя обязательно
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="secondName">Отчество</label>
+          <input
+            type="text"
+            id="secondName"
+            name="secondName"
+            [(ngModel)]="model.secondName"
+            placeholder="Введите отчество (необязательно)"
+            #secondNameInput="ngModel"
+            class="form-input"
+          >
+          <span class="input-icon">👤</span>
+        </div>
+
+        <div class="form-group">
+          <label for="gender">Пол</label>
+          <select
+            id="gender"
+            name="gender"
+            [(ngModel)]="model.gender"
+            required
+            #genderInput="ngModel"
+            class="form-input"
+            [class.invalid]="genderInput.invalid && genderInput.touched"
+          >
+            <option value="" disabled>Выберите пол</option>
+            <option value="male">Мужской</option>
+            <option value="female">Женский</option>
+            <option value="other">Другой</option>
+          </select>
+          <span class="input-icon">👥</span>
+          <div class="error-message" *ngIf="genderInput.invalid && genderInput.touched">
+            Выберите пол
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="birthday">Дата рождения</label>
+          <input
+            type="date"
+            id="birthday"
+            name="birthday"
+            [(ngModel)]="model.birthday"
+            required
+            #birthdayInput="ngModel"
+            class="form-input"
+            [class.invalid]="birthdayInput.invalid && birthdayInput.touched"
+          >
+          <span class="input-icon">🎂</span>
+          <div class="error-message" *ngIf="birthdayInput.invalid && birthdayInput.touched">
+            Укажите дату рождения
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="username">Имя пользователя</label>
+          <input
+            type="text"
+            id="username"
+            name="username"
+            [(ngModel)]="model.username"
+            required
+            minlength="3"
+            placeholder="Введите имя пользователя"
+            #usernameInput="ngModel"
+            class="form-input"
+            [class.invalid]="usernameInput.invalid && usernameInput.touched"
+          >
+          <span class="input-icon">👤</span>
+          <div class="error-message" *ngIf="usernameInput.invalid && usernameInput.touched">
+            <span *ngIf="usernameInput.errors?.['required']">Имя пользователя обязательно</span>
+            <span *ngIf="usernameInput.errors?.['minlength']">Минимум 3 символа</span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="password">Пароль</label>
+          <input
+            type="password"
+            id="password"
+            name="password"
+            [(ngModel)]="model.password"
+            required
+            minlength="6"
+            #passwordInput="ngModel"
+            placeholder="Введите пароль"
+            class="form-input"
+            [class.invalid]="passwordInput.invalid && passwordInput.touched"
+          >
+          <span class="input-icon">🔒</span>
+          <div class="error-message" *ngIf="passwordInput.invalid && passwordInput.touched">
+            <span *ngIf="passwordInput.errors?.['required']">Пароль обязателен</span>
+            <span *ngIf="passwordInput.errors?.['minlength']">Минимум 6 символов</span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="confirmPassword">Подтвердите пароль</label>
+          <input
+            type="password"
+            id="confirmPassword"
+            name="confirmPassword"
+            [(ngModel)]="model.confirmPassword"
+            required
+            placeholder="Повторите пароль"
+            #confirmPasswordInput="ngModel"
+            class="form-input"
+            [class.invalid]="model.password !== model.confirmPassword && confirmPasswordInput.touched"
+          >
+          <span class="input-icon">✅</span>
+          <div class="error-message" *ngIf="model.password !== model.confirmPassword && confirmPasswordInput.touched">
+            Пароли не совпадают
+          </div>
+        </div>
+
+        <div class="form-group checkbox-group">
+          <label class="checkbox-label">
+            <input type="checkbox" name="isAuthor" [(ngModel)]="model.isAuthor">
+            <span class="checkmark"></span>
+            Я автор/создатель контента
+          </label>
+        </div>
+      </div>
+
+      <!-- Запомнить меня (только для входа) -->
+      <div class="form-options" *ngIf="isLoginMode">
+        <label class="checkbox-label">
+          <input type="checkbox" name="remember" [(ngModel)]="model.remember">
+          <span class="checkmark"></span>
+          Запомнить меня
+        </label>
+        <a href="#" class="forgot-link">Забыли пароль?</a>
+      </div>
+
+      <!-- Кнопка отправки -->
+      <button
+        type="submit"
+        class="auth-button"
+        [class.loading]="isLoading"
+        [disabled]="isLoading || (isLoginMode ? !authForm.form.valid : !isRegistrationFormValid())"
+      >
+        <span *ngIf="!isLoading">
+          {{ isLoginMode ? 'Войти' : 'Зарегистрироваться' }}
+        </span>
+        <span *ngIf="isLoading" class="loading-spinner"></span>
+      </button>
+    </form>
+
+    <div class="divider">
+      <span>или</span>
+    </div>
+
+    <div class="social-auth">
+      <button class="social-button google">
+        <span class="social-icon">🔍</span>
+        Продолжить с Google
+      </button>
+      <button class="social-button github">
+        <span class="social-icon">💻</span>
+        Продолжить с GitHub
+      </button>
+    </div>
+
+    <div class="auth-switch">
+      <p>
+        {{ isLoginMode ? 'Ещё нет аккаунта?' : 'Уже есть аккаунт?' }}
+        <button type="button" class="switch-link" (click)="toggleMode()">
+          {{ isLoginMode ? 'Зарегистрироваться' : 'Войти' }}
+        </button>
+      </p>
+    </div>
+
+    <div class="back-home">
+      <a routerLink="/" class="home-link">← Вернуться на главную</a>
+    </div>
+  </div>
+
+  <div class="auth-background">
+    <div class="floating-shape shape-1"></div>
+    <div class="floating-shape shape-2"></div>
+    <div class="floating-shape shape-3"></div>
+  </div>
+</div>

@@ -1,0 +1,119 @@
+<div class="profile-container">
+  <!-- Профиль -->
+  <div class="profile-card">
+    <div class="profile-header">
+      <div class="avatar-container">
+        <img [src]="user?.photoUrl || '../assets/1615134145ed2a1b4b85d692a41f49fd.jpg'" alt="User Avatar"
+          class="avatar">
+        <label for="avatar-upload" class="avatar-upload-label">
+          <i class="upload-icon">📷</i>
+          <input id="avatar-upload" type="file" accept="image/*" class="hidden">
+        </label>
+      </div>
+
+      <div class="profile-info">
+        <h2 class="user-name">{{ user?.username }}</h2>
+        <div class="profile-stats">
+          <span class="stat-item">Проектов: {{ projects.length }}</span>
+        </div>
+      </div>
+    </div>
+
+    <button (click)="logout()" class="logout-button">
+      <i>🚪</i>
+      Выйти
+    </button>
+  </div>
+
+  <!-- Проекты -->
+  <div class="section">
+    <div class="section-header">
+      <h3 class="section-title">🎮 Мои проекты</h3>
+      <button class="add-button" routerLink="/create-project">
+        <i>➕</i>
+        Новый проект
+      </button>
+    </div>
+
+    <div *ngIf="projects.length === 0" class="empty-state">
+      <i class="empty-icon">📁</i>
+      <p>У вас пока нет проектов</p>
+      <button class="primary-button" routerLink="/create-project">
+        Создать первый проект
+      </button>
+    </div>
+
+    <div class="projects-grid" *ngIf="projects.length > 0">
+      <div *ngFor="let project of projects" class="project-card"  routerLink="/project-details/{{project.id}}">
+        <div class="inactive-overlay" *ngIf="project.status.id !== 3 && project.status.id !==4">
+          <span class="inactive-text">На обработке</span>
+        </div>
+
+        <div class="inactive-overlay" *ngIf="project.status.id == 4">
+          <span class="inactive-text">Бан нахуй</span>
+        </div>
+        <div class="project-header">
+          <img src='http://localhost:9000/{{project?.photoUrl}}'>
+          <h4 class="project-title">{{ project.name }}</h4>
+          <span class="status-compact status-{{project.status.name.toLowerCase()}}">
+            <span class="status-dot"></span>{{ project.status.name }}
+          </span>
+        </div>
+        <p class="project-description">{{ project.description }}</p>
+        <div class="project-footer">
+          <span class="project-date">
+            <i>📅</i>
+            {{ project.versionDate | date:'dd.MM.yyyy' }}
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h3 class="section-title">⚙️ Настройки профиля</h3>
+
+    <div class="settings-card">
+      <div class="setting-item">
+        <div class="setting-info">
+          <h4>Личная информация</h4>
+          <p>Измените ваши персональные данные</p>
+        </div>
+        <button class="edit-button">Редактировать</button>
+      </div>
+
+      <div class="setting-item">
+        <div class="setting-info">
+          <h4>Безопасность</h4>
+          <p>Смена пароля и двухфакторная аутентификация</p>
+        </div>
+        <button class="edit-button" routerLink="/security-settings">Изменить</button>
+      </div>
+
+      <div class="setting-item">
+        <div class="setting-info">
+          <h4>Уведомления</h4>
+          <p>Настройте получение уведомлений</p>
+        </div>
+        <div class="toggle-container">
+          <label class="toggle-switch">
+            <input type="checkbox">
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+      </div>
+
+      <div class="setting-item">
+        <div class="setting-info">
+          <h4>Тема оформления</h4>
+          <p>Выберите preferred theme</p>
+        </div>
+        <select class="theme-select">
+          <option value="light">🌞 Светлая</option>
+          <option value="dark">🌙 Темная</option>
+          <option value="auto">⚙️ Системная</option>
+        </select>
+      </div>
+    </div>
+  </div>
+</div>

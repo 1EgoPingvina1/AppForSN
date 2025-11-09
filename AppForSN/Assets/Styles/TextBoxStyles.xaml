@@ -16,13 +16,108 @@
     <!-- Основная кнопка с анимацией свечения -->
     <Style x:Key="SteamPrimaryButton" TargetType="Button" BasedOn="{StaticResource SteamBaseButtonStyle}">
         <Setter Property="Background" Value="#4C51BF"/>
+        <Setter Property="Foreground" Value="White"/>
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="Padding" Value="12,6"/>
+        <Setter Property="FontSize" Value="14"/>
+        <Setter Property="FontWeight" Value="SemiBold"/>
+        <Setter Property="Cursor" Value="Hand"/>
         <Setter Property="Effect">
             <Setter.Value>
                 <DropShadowEffect x:Name="glowEffect" 
-                                BlurRadius="8" 
-                                ShadowDepth="2" 
-                                Opacity="0.3" 
-                                Color="#66C0F4"/>
+                            BlurRadius="8" 
+                            ShadowDepth="2" 
+                            Opacity="0.3" 
+                            Color="#66C0F4"/>
+            </Setter.Value>
+        </Setter>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border x:Name="border"
+                        Background="{TemplateBinding Background}"
+                        CornerRadius="3"
+                        SnapsToDevicePixels="True">
+                        <Border.Effect>
+                            <DropShadowEffect BlurRadius="8" 
+                                        ShadowDepth="2" 
+                                        Opacity="0.3" 
+                                        Color="#66C0F4"/>
+                        </Border.Effect>
+                        <ContentPresenter x:Name="contentPresenter"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"
+                                    RecognizesAccessKey="True"/>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <!-- Normal State -->
+                        <Trigger Property="IsMouseOver" Value="False">
+                            <Setter TargetName="border" Property="Effect">
+                                <Setter.Value>
+                                    <DropShadowEffect BlurRadius="8" 
+                                                ShadowDepth="2" 
+                                                Opacity="0.3" 
+                                                Color="#66C0F4"/>
+                                </Setter.Value>
+                            </Setter>
+                        </Trigger>
+
+                        <!-- Hover State -->
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter Property="Background" Value="#434190"/>
+                            <Setter TargetName="border" Property="Effect">
+                                <Setter.Value>
+                                    <DropShadowEffect BlurRadius="12" 
+                                                ShadowDepth="3" 
+                                                Opacity="0.5" 
+                                                Color="#66C0F4"/>
+                                </Setter.Value>
+                            </Setter>
+                            <Trigger.EnterActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <ColorAnimation Storyboard.TargetProperty="Background.Color"
+                                                    To="#434190"
+                                                    Duration="0:0:0.15"/>
+                                        <DoubleAnimation Storyboard.TargetProperty="Effect.BlurRadius"
+                                                    To="12"
+                                                    Duration="0:0:0.15"/>
+                                        <DoubleAnimation Storyboard.TargetProperty="Effect.Opacity"
+                                                    To="0.5"
+                                                    Duration="0:0:0.15"/>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.EnterActions>
+                        </Trigger>
+
+                        <!-- Pressed State -->
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter Property="Background" Value="#3A3D80"/>
+                            <Setter TargetName="border" Property="Effect">
+                                <Setter.Value>
+                                    <DropShadowEffect BlurRadius="6" 
+                                                ShadowDepth="1" 
+                                                Opacity="0.2" 
+                                                Color="#66C0F4"/>
+                                </Setter.Value>
+                            </Setter>
+                            <Setter TargetName="contentPresenter" Property="Margin" Value="0,1,0,0"/>
+                        </Trigger>
+
+                        <!-- Disabled State -->
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Background" Value="#A0AEC0"/>
+                            <Setter Property="Foreground" Value="#E2E8F0"/>
+                            <Setter TargetName="border" Property="Effect">
+                                <Setter.Value>
+                                    <DropShadowEffect BlurRadius="0" 
+                                                ShadowDepth="0" 
+                                                Opacity="0"/>
+                                </Setter.Value>
+                            </Setter>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
             </Setter.Value>
         </Setter>
     </Style>
@@ -36,13 +131,48 @@
 
     <!-- Стиль текстового поля с анимацией -->
     <Style x:Key="SteamTextBoxStyle" TargetType="TextBox">
-        <Setter Property="Background" Value="White"/>
-        <Setter Property="BorderBrush" Value="#E2E8F0"/>
+        <Setter Property="Background" Value="#FFF7FAFC"/>
+        <Setter Property="BorderBrush" Value="#FFE2E8F0"/>
         <Setter Property="BorderThickness" Value="1"/>
-        <Setter Property="Foreground" Value="{StaticResource SteamGrayBrush}"/>
+        <Setter Property="Foreground" Value="#FF2D3748"/>
         <Setter Property="FontSize" Value="14"/>
         <Setter Property="Padding" Value="8"/>
         <Setter Property="SnapsToDevicePixels" Value="True"/>
+
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="TextBox">
+                    <Border x:Name="border" 
+                        Background="{TemplateBinding Background}"
+                        BorderBrush="{TemplateBinding BorderBrush}"
+                        BorderThickness="{TemplateBinding BorderThickness}"
+                        CornerRadius="3">
+                        <ScrollViewer x:Name="PART_ContentHost"/>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <!-- Анимация при фокусе -->
+                        <Trigger Property="IsKeyboardFocused" Value="True">
+                            <Setter TargetName="border" Property="BorderBrush" Value="#3182CE"/>
+                            <Trigger.EnterActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <ColorAnimation 
+                                        Storyboard.TargetName="border"
+                                        Storyboard.TargetProperty="BorderBrush.Color"
+                                        To="#3182CE"
+                                        Duration="0:0:0.2"/>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.EnterActions>
+                        </Trigger>
+                        <!-- Эффект при наведении -->
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="border" Property="BorderBrush" Value="#CBD5E0"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
     </Style>
 
     <!-- Стиль PasswordBox с анимацией -->
@@ -50,10 +180,57 @@
         <Setter Property="Background" Value="White"/>
         <Setter Property="BorderBrush" Value="#E2E8F0"/>
         <Setter Property="BorderThickness" Value="1"/>
-        <Setter Property="Foreground" Value="{StaticResource SteamGrayBrush}"/>
+        <Setter Property="Foreground" Value="#FF2D3748"/>
         <Setter Property="FontFamily" Value="Segoe UI, Arial"/>
         <Setter Property="FontSize" Value="14"/>
         <Setter Property="Padding" Value="8"/>
         <Setter Property="SnapsToDevicePixels" Value="True"/>
+
+
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="PasswordBox">
+                    <Grid>
+                        <Border x:Name="border" 
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="3">
+                            <ScrollViewer x:Name="PART_ContentHost"/>
+                        </Border>
+                        <TextBlock x:Name="placeholderText" 
+                               Text="Пароль"
+                               Foreground="#A0AEC0"
+                               Margin="8,0,0,0"
+                               Visibility="Collapsed"
+                               IsHitTestVisible="False"/>
+                    </Grid>
+                    <ControlTemplate.Triggers>
+
+                        <!-- Анимация при фокусе -->
+                        <Trigger Property="IsKeyboardFocused" Value="True">
+                            <Setter TargetName="border" Property="BorderBrush" Value="#3182CE"/>
+                            <Trigger.EnterActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <ColorAnimation 
+                                        Storyboard.TargetName="border"
+                                        Storyboard.TargetProperty="BorderBrush.Color"
+                                        To="#3182CE"
+                                        Duration="0:0:0.3"/>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.EnterActions>
+                        </Trigger>
+                        <!-- Эффект при наведении -->
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="border" Property="BorderBrush" Value="#CBD5E0"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
     </Style>
+
+    
 </ResourceDictionary>

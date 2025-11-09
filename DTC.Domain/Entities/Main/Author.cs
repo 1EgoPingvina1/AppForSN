@@ -1,10 +1,5 @@
 ﻿using DTC.Domain.Entities.Identity;
-using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DTC.Domain.Entities.Main
 {
@@ -12,20 +7,14 @@ namespace DTC.Domain.Entities.Main
     {
         [Key]
         public int Id { get; set; }
-
+        public string FirstName { get; set; } = null!;
+        public string? SecondName { get; set; }
+        public string LastName { get; set; } = null!;
         public string? Description { get; set; }
-
         public DateTime RegDate { get; set; }
-
-        // --- Связи ---
-
-
         public int UserId { get; set; }
 
-
         public virtual User User { get; set; }
-
-
         public virtual ICollection<AuthorGroupMember> GroupMemberships { get; set; } = new List<AuthorGroupMember>();
     }
 }

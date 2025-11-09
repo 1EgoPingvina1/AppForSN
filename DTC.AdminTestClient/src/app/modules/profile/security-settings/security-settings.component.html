@@ -1,0 +1,76 @@
+<div class="security-settings">
+  <div class="security-header">
+    <button mat-button="elevated" [routerLink]="['/my-account']">
+      <mat-icon>arrow_back</mat-icon>
+      Назад к профилю
+    </button>
+    <h2>Настройки безопасности</h2>
+  </div>
+
+
+  <div class="security-sections">
+
+  </div>
+  <div class="security-sections">
+    <!-- Двухфакторная аутентификация -->
+    <div class="security-section">
+      <div class="section-header">
+        <h3>🔒 Двухфакторная аутентификация</h3>
+        <span class="status-badge" [class]="isTwoFactorEnabled ? 'enabled' : 'disabled'">
+          {{ isTwoFactorEnabled ? 'Включена' : 'Отключена' }}
+        </span>
+      </div>
+      
+      <p class="section-description">
+        Добавьте дополнительный уровень безопасности к вашему аккаунту. 
+        После включения, кроме пароля вам нужно будет вводить код из приложения-аутентификатора.
+      </p>
+
+      <div class="action-buttons">
+        <button 
+          *ngIf="!isTwoFactorEnabled"
+          [disabled]="isTwoFactorEnabled"
+          mat-raised-button 
+          color="primary"
+          [routerLink]="['/otp-setup']">
+          <mat-icon>enhanced_encryption</mat-icon>
+          Включить 2FA
+        </button>
+
+        <button 
+          *ngIf="isTwoFactorEnabled"
+          mat-stroked-button 
+          color="warn"
+          (click)="disableTwoFactor()"
+          [disabled]="isDisabling">
+          <mat-icon>no_encryption</mat-icon>
+          {{ isDisabling ? 'Отключение...' : 'Отключить 2FA' }}
+        </button>
+
+        <button 
+          *ngIf="isTwoFactorEnabled"
+          mat-stroked-button
+          [routerLink]="['/two-factor/setup']">
+          <mat-icon>manage_accounts</mat-icon>
+          Управление 2FA
+        </button>
+      </div>
+
+      <div class="feature-list" *ngIf="isTwoFactorEnabled">
+        <div class="feature-item">
+          <mat-icon class="feature-icon">check_circle</mat-icon>
+          <span>Коды генерируются в приложении</span>
+        </div>
+        <div class="feature-item">
+          <mat-icon class="feature-icon">check_circle</mat-icon>
+          <span>Резервные коды для восстановления</span>
+        </div>
+        <div class="feature-item">
+          <mat-icon class="feature-icon">check_circle</mat-icon>
+          <span>Защита от несанкционированного доступа</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>

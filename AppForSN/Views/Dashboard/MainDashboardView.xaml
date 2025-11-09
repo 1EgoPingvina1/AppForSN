@@ -7,20 +7,8 @@
         xmlns:shared="clr-namespace:AppForSNForUsers.Views.Shared"
         mc:Ignorable="d"
         xmlns:vm="clr-namespace:AppForSNForUsers.ViewModels"
-        MinWidth="600" MinHeight="400"
-        d:DesignHeight="450" d:DesignWidth="800">
+        Height="600" Width="900">
     <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-        </Grid.RowDefinitions>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="Auto"/>
-            <ColumnDefinition Width="*"/>
-
-        </Grid.ColumnDefinitions>
-
-        <ContentControl Grid.Column="1" Grid.Row="1" Content="{Binding CurrentView}" />
-
+        <ContentControl Content="{Binding CurrentViewModel}" />
     </Grid>
 </Window>

@@ -1,8 +1,10 @@
 ﻿using AutoMapper;
 using DTC.Application.DTO;
-using DTC.Application.Interfaces.Services;
 using DTC.Application.Interfaces;
+using DTC.Application.Interfaces.Services;
 using DTC.Domain.Entities.Main;
+using DTC.Infrastructure.Data;
+using Microsoft.EntityFrameworkCore;
 using System.Security;
 
 namespace DTC.Infrastructure.Services
@@ -11,20 +13,28 @@ namespace DTC.Infrastructure.Services
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
+        private readonly ApplicationDataBaseContext _dataBaseContext;
+        private readonly IMinioFileService _minioStorage;
 
-        public AuthorGroupService(IUnitOfWork unitOfWork, IMapper mapper)
+
+        public AuthorGroupService(IUnitOfWork unitOfWork, IMapper mapper, ApplicationDataBaseContext dataBaseContext, IMinioFileService minioStorage)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
+            _dataBaseContext = dataBaseContext;
+            _minioStorage = minioStorage;
         }
 
         public async Task<AuthorGroupResponseDto> CreateGroupAsync(CreateAuthorGroupDto createDto, int creatorUserId)
         {
+            var user = await _dataBaseContext.Users.FirstOrDefaultAsync(u => u.Id == creatorUserId);
             var author = await _unitOfWork.AuthorsRepository.GetByUserIdAsync(creatorUserId);
             if (author == null)
             {
                 author = new Author
                 {
+                    FirstName = user.FirstName,
+                    LastName = user.LastName,
                     UserId = creatorUserId,
                     RegDate = DateTime.UtcNow
                 };
@@ -35,10 +45,20 @@ namespace DTC.Infrastructure.Services
 
 
             var group = _mapper.Map<AuthorGroup>(createDto);
-            group.RegUser_ID = creatorUserId;
+            group.RegUserId = creatorUserId;
             group.RegDate = DateTime.UtcNow;
 
-            if (string.IsNullOrEmpty(group.Photo))
+            if (createDto.Photo != null)
+            {
+                using Stream stream = createDto.Photo.OpenReadStream();
+
+                string objectName = $"{Guid.NewGuid()}_{createDto.Photo.FileName}";
+
+                string url = await _minioStorage.UploadFileAsync(stream, objectName, createDto.Photo.ContentType, "groups-photos");
+
+                group.Photo = url;
+            }
+            else
             {
                 group.Photo = "default_group_photo.jpg";
             }

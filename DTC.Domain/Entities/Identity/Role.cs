@@ -4,6 +4,6 @@ namespace DTC.Domain.Entities.Identity
 {
     public class Role : IdentityRole<int>
     {
-        public ICollection<UserRoles> UserRoles { get; set; }
+        public ICollection<AppUserRole> UserRoles { get; set; }
     }
 }

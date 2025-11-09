@@ -1,0 +1,197 @@
+<div class="two-factor-setup">
+  <div class="setup-header">
+    <button mat-button class="elevated" routerLink="/security-settings">
+      <mat-icon>arrow_back</mat-icon>Назад
+    </button>
+    <h1>Настройка двухфакторной аутентификации</h1>
+    <p>Дополнительная защита вашего аккаунта</p>
+  </div>
+
+  <div class="setup-step" *ngIf="currentStep === 'setup'">
+    <div class="step-card">
+      <div class="step-header">
+        <div class="step-number">1</div>
+        <h2>Начало настройки</h2>
+      </div>
+
+      <div class="step-content">
+        <div class="info-section">
+          <mat-icon class="info-icon">security</mat-icon>
+          <h3>Зачем это нужно?</h3>
+          <p>
+            Двухфакторная аутентификация добавляет дополнительный уровень безопасности к вашему аккаунту.
+            После включения, кроме пароля вам нужно будет вводить код из приложения-аутентификатора.
+          </p>
+        </div>
+
+        <div class="action-section">
+          <button mat-raised-button color="primary" (click)="generateSetup()" [disabled]="isGenerating"
+            class="setup-button">
+            <mat-spinner diameter="20" *ngIf="isGenerating"></mat-spinner>
+            <mat-icon *ngIf="!isGenerating">qr_code</mat-icon>
+            {{ isGenerating ? 'Генерация...' : 'Начать настройку' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Step 2: Verification -->
+  <div class="setup-step" *ngIf="currentStep === 'verification' && twoFactorData">
+    <div class="step-card">
+      <div class="step-header">
+        <div class="step-number">2</div>
+        <h2>Настройка приложения</h2>
+      </div>
+
+      <div class="step-content">
+        <!-- Установка приложения -->
+        <div class="instruction-section">
+          <h3>1. Установите приложение аутентификатор</h3>
+          <div class="authenticator-apps">
+            <div class="app-card">
+              <div class="app-icon">📱</div>
+              <div class="app-info">
+                <strong>Google Authenticator</strong>
+                <div class="app-links">
+                  <a href="https://play.google.com/store/apps/details?id=com.google.android.apps.authenticator2"
+                    target="_blank" class="app-link">Android</a>
+                  <a href="https://apps.apple.com/ru/app/google-authenticator/id388497605" target="_blank"
+                    class="app-link">iOS</a>
+                </div>
+              </div>
+            </div>
+
+            <div class="app-card">
+              <div class="app-icon">🔐</div>
+              <div class="app-info">
+                <strong>Microsoft Authenticator</strong>
+                <div class="app-links">
+                  <a href="https://play.google.com/store/apps/details?id=com.azure.authenticator" target="_blank"
+                    class="app-link">Android</a>
+                  <a href="https://apps.apple.com/ru/app/microsoft-authenticator/id983156458" target="_blank"
+                    class="app-link">iOS</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="qr-section">
+          <h3>2. Отсканируйте QR-код</h3>
+          <div class="qr-container">
+            <qrcode [qrdata]="twoFactorData.otpAuthUri" [width]="256" [errorCorrectionLevel]="'M'" [elementType]="'img'"
+              alt="QR Code for 2FA" class="qr-code">
+            </qrcode>
+          </div>
+        </div>
+
+        <div class="manual-entry-section">
+          <h3>Или введите код вручную</h3>
+          <div class="secret-key-container">
+            <code class="secret-key">{{ twoFactorData.manualEntryKey }}</code>
+            <button mat-icon-button (click)="copyToClipboard(twoFactorData.manualEntryKey, 'Секретный ключ')"
+              matTooltip="Скопировать ключ">
+              <mat-icon>content_copy</mat-icon>
+            </button>
+          </div>
+          <p class="hint">Введите этот код в ваше приложение аутентификатора</p>
+        </div>
+
+        <!-- Verification -->
+        <div class="verification-section">
+          <h3>3. Введите код подтверждения</h3>
+          <form [formGroup]="verificationForm" (ngSubmit)="verifyAndEnable()">
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>6-значный код из приложения</mat-label>
+              <input matInput formControlName="verificationCode" placeholder="123456" maxlength="6"
+                autocomplete="one-time-code">
+              <mat-hint>Введите код из вашего приложения аутентификатора</mat-hint>
+              <mat-error *ngIf="verificationCode?.errors?.['required']">
+                Введите код подтверждения
+              </mat-error>
+              <mat-error *ngIf="verificationCode?.errors?.['minlength'] || verificationCode?.errors?.['maxlength']">
+                Код должен содержать 6 цифр
+              </mat-error>
+              <mat-error *ngIf="verificationCode?.errors?.['pattern']">
+                Используйте только цифры
+              </mat-error>
+              <mat-error *ngIf="verificationCode?.errors?.['invalidCode']">
+                Неверный код подтверждения
+              </mat-error>
+            </mat-form-field>
+
+            <div class="verification-actions">
+              <button mat-stroked-button type="button" (click)="previousStep()">
+                Назад
+              </button>
+              <button mat-raised-button color="primary" type="submit"
+                [disabled]="verificationForm.invalid || isVerifying">
+                <mat-spinner diameter="20" *ngIf="isVerifying"></mat-spinner>
+                <mat-icon *ngIf="!isVerifying">check_circle</mat-icon>
+                {{ isVerifying ? 'Проверка...' : 'Подтвердить и включить' }}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Step 3: Backup Codes -->
+  <div class="setup-step" *ngIf="currentStep === 'backup'">
+    <div class="step-card">
+      <div class="step-header">
+        <div class="step-number">3</div>
+        <h2>Резервные коды доступа</h2>
+      </div>
+
+      <div class="step-content">
+        <div class="backup-warning">
+          <mat-icon class="warning-icon">warning</mat-icon>
+          <h3>Сохраните эти коды!</h3>
+          <p>
+            Эти резервные коды можно использовать для входа в аккаунт, если у вас нет доступа
+            к приложению аутентификатору. <strong>Каждый код можно использовать только один раз.</strong>
+          </p>
+        </div>
+
+        <div class="backup-codes-container">
+          <div class="backup-codes-grid">
+            <div class="backup-code-item" *ngFor="let code of backupCodes; let i = index">
+              <span class="code-number">{{ i + 1 }}.</span>
+              <code class="backup-code">{{ code }}</code>
+            </div>
+          </div>
+        </div>
+
+        <div class="backup-actions">
+          <button mat-stroked-button (click)="copyToClipboard(backupCodes.join('\n'), 'Резервные коды')">
+            <mat-icon>content_copy</mat-icon>
+            Копировать все
+          </button>
+
+          <button mat-stroked-button (click)="downloadBackupCodes()">
+            <mat-icon>download</mat-icon>
+            Скачать TXT
+          </button>
+
+          <button mat-stroked-button (click)="generateNewBackupCodes()">
+            <mat-icon>refresh</mat-icon>
+            Новые коды
+          </button>
+        </div>
+
+        <div class="completion-actions">
+          <button mat-stroked-button (click)="previousStep()">
+            Назад
+          </button>
+          <button mat-raised-button color="primary" (click)="completeSetup()">
+            <mat-icon>done_all</mat-icon>
+            Завершить настройку
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

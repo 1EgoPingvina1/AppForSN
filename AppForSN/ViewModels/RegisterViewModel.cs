@@ -108,7 +108,6 @@ namespace AppForSNForUsers.ViewModels
                 if (result != null)
                 {
                     MessageBox.Show("Регистрация прошла успешно");
-                    _mainViewModel.Navigate("Home");
                 }
                 else
                 {
@@ -124,10 +123,6 @@ namespace AppForSNForUsers.ViewModels
                 ErrorMessage = $"Ошибка: {ex.Message}";
             }
         }
-
-        public void OpenLoginWindow() => _mainViewModel.Navigate("Login");
-
-        // 🔁 OnPropertyChanged
         public event PropertyChangedEventHandler PropertyChanged;
         protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
             => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));

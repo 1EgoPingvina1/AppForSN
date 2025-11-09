@@ -1,10 +1,22 @@
 ﻿<Application x:Class="AppForSNForUsers.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="clr-namespace:AppForSNForUsers.ViewModels"
+             xmlns:v="clr-namespace:AppForSNForUsers.Views.Pages"
              xmlns:local="clr-namespace:AppForSNForUsers"
              StartupUri="../Views/Dashboard/MainDashboardView.xaml">
     <Application.Resources>
         <ResourceDictionary>
+
+
+            <DataTemplate DataType="{x:Type vm:LoginViewModel}">
+                <v:LoginView/>
+            </DataTemplate>
+
+            <DataTemplate DataType="{x:Type vm:ProjectsViewModel}">
+                <v:ProjectsView/>
+            </DataTemplate>
+
             <ResourceDictionary.MergedDictionaries>
 
                 <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Light.xaml"/>

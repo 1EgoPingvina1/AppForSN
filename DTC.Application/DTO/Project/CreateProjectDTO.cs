@@ -5,16 +5,18 @@ namespace DTC.Application.DTO.Project
 {
     public class CreateProjectDTO
     {
-        [Required]
-        [StringLength(100)]
-        public string Name { get; set; }
-        [Required]
-        public string Version { get; set; }
-        [StringLength(2000)]
-        public string Description { get; set; }
-        public int ProjectType_ID { get; set; }
-        public int AuthorGroup_ID { get; set; }
-        public IFormFile Photo { get; set; }
-        public IFormFile ProjectFiles { get; set; }
+        public string Name { get; set; } = null!;
+        public string Version { get; set; } = null!;
+        public DateTime VersionDate { get; set; }
+        public string Description { get; set; } = null!;
+        public bool IsOpenSource { get; set; }
+        public string? PhotoUrl { get; set; }
+        public IFormFile? PhotoFile { get; set; }
+        public int AuthorGroupId { get; set; }
+        public int StatusId { get; set; }
+        public int ProjectTypeId { get; set; }
+        public int BeginAge { get; set; }
+        public int EndAge { get; set; }
+        public List<IFormFile> Files { get; set; } = new();
     }
 }

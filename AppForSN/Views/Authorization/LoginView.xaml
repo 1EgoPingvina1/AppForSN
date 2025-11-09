@@ -22,27 +22,22 @@
 
         <TextBox Text="{Binding Username, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource SteamTextBoxStyle}" Grid.Row="2" Margin="0,0,0,15"/>
 
-        <PasswordBox x:Name="PasswordBox" Style="{StaticResource SteamPasswordBoxStyle}" Tag="Пароль" Grid.Row="3" Margin="0,0,0,20"/>
+        <TextBox Text="{Binding Password, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource SteamTextBoxStyle}" Grid.Row="3" Margin="0,0,0,20"/>
 
         <Button Style="{StaticResource SteamPrimaryButton}"
                 Command="{Binding LoginCommand}"
                 Content="Войти"
-                Click="LoginButton_Click"
                 Height="37"
                 Grid.Row="4"/>
 
         <TextBlock Text="{Binding ErrorMessage}" Foreground="Red" TextWrapping="Wrap"
                    Grid.Row="5"/>
 
-        <!-- Кнопка для перехода к регистрации -->
         <Button Grid.Row="6"
                 Margin="0,20,0,0"
                 Command="{Binding NavigateToRegistrationCommand}"
                 Background="Transparent"
-                BorderThickness="0"
-                HorizontalAlignment="Center"
-                Cursor="Hand"
-                Content="Нет аккаунта? Зарегистрируйтесь"
-                />
+                BorderBrush="Transparent"
+                Content="Нет аккаунта? Зарегистрируйтесь"/>
     </Grid>
 </UserControl>

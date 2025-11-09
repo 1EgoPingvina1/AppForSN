@@ -1,0 +1,58 @@
+<section class="hero">
+  <div class="hero-content">
+    <h1 class="hero-title">Добро пожаловать в Digital Technology Company</h1>
+    <p class="hero-subtitle">Создаем современные веб-приложения вместе</p>
+    <div class="hero-buttons">
+      <button class="btn-primary" (click)="navigateToContact()">
+        Войти
+      </button>
+      <button class="btn-secondary">
+        Регистрация
+      </button>
+    </div>
+  </div>
+  <div class="hero-visual">
+    <div class="floating-card">🚀</div>
+    <div class="floating-card">💡</div>
+    <div class="floating-card">⭐</div>
+    <div class="floating-card">
+      <img src="./assets/cat.png" alt="">
+    </div>
+  </div>
+</section>
+
+<section class="features">
+  <div class="container">
+    <h2 class="section-title">Почему выбирают нас</h2>
+    <div class="features-grid">
+      <div class="feature-card" *ngFor="let feature of features">
+        <div class="feature-icon">{{ feature.icon }}</div>
+        <h3 class="feature-title">{{ feature.title }}</h3>
+        <p class="feature-description">{{ feature.description }}</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="stats">
+  <div class="container">
+    <div class="stats-grid">
+      <div class="stat-item" *ngFor="let stat of stats">
+        <div class="stat-number">{{ stat.number }}</div>
+        <div class="stat-label">{{ stat.label }}</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="cta">
+  <div class="container">
+    <div class="cta-content">
+      <h2 class="cta-title">Готовы начать проект?</h2>
+      <p class="cta-text">Свяжитесь с нами сегодня и получите бесплатную консультацию</p>
+      <button class="btn-primary large" (click)="navigateToContact()">
+        Связаться с нами
+      </button>
+    </div>
+  </div>
+</section>

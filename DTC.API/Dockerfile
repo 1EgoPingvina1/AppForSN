@@ -13,6 +13,10 @@ FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 COPY ["DTC.API/DTC.API.csproj", "DTC.API/"]
+COPY ["DTC.Application/DTC.Application.csproj", "DTC.Application/"]
+COPY ["DTC.Domain/DTC.Domain.csproj", "DTC.Domain/"]
+COPY ["DTC.Infrastructure/DTC.Infrastructure.csproj", "DTC.Infrastructure/"]
+
 RUN dotnet restore "./DTC.API/DTC.API.csproj"
 COPY . .
 WORKDIR "/src/DTC.API"
